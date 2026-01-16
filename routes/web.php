@@ -12,7 +12,7 @@ use App\Http\Middleware\RoleMiddleware; // <- On inclut le middleware
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 // Dashboard générique (accessible après authentification)
 Route::get('/dashboard', function () {
