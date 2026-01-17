@@ -186,10 +186,11 @@
             </div>
 
             <!-- users management -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div id="employes-section" class="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div class="bg-[#FFC62A] text-[#1E1E1E] px-6 py-4 flex justify-between items-center">
                     <h2 class="text-xl font-bold">Utilisateurs récents</h2>
-                    <a href="#" class="text-sm hover:text-[#01B3BB] transition">Gérer les utilisateurs →</a>
+                    <a href="#"
+   class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">Gérer les employés</a>
                 </div>
                 <div class="p-6">
                     <div class="overflow-x-auto">
@@ -203,7 +204,7 @@
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                           <!-- <tbody>
                                 @for($i = 1; $i <= 5; $i++)
                                 <tr class="border-b border-gray-100 hover:bg-gray-50">
                                     <td class="py-4 px-4">
@@ -239,7 +240,7 @@
                                     </td>
                                 </tr>
                                 @endfor
-                            </tbody>
+                            </tbody>-->
                         </table>
                     </div>
                 </div>
@@ -252,17 +253,29 @@
             <div class="bg-white rounded-2xl shadow-lg p-6">
                 <h3 class="text-lg font-bold text-[#1E1E1E] mb-4">Actions rapides</h3>
                 <div class="space-y-3">
-                    <a href="#" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-                        <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <span class="font-medium block">Gérer les utilisateurs</span>
-                            <span class="text-sm text-gray-500">Ajouter/éditer/supprimer</span>
-                        </div>
-                    </a>
+                    <a href="#clients-section" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+    <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
+        <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+        </svg>
+    </div>
+    <div>
+        <span class="font-medium block">Gérer les clients</span>
+        <span class="text-sm text-gray-500">verrouiller/déverrouiller</span>
+    </div>
+</a>
+ <a href="#employes-section" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+    <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
+        <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+        </svg>
+    </div>
+    <div>
+        <span class="font-medium block">Gérer les employés & les admins</span>
+        <span class="text-sm text-gray-500">Ajouter/éditer/supprimer</span>
+    </div>
+</a>
+
                     
                     <a href="#" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
                         <div class="w-10 h-10 bg-[#FFC62A]/10 rounded-lg flex items-center justify-center mr-3">
@@ -370,6 +383,52 @@
 
     <!-- system alerts -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        @if(isset($clients))
+<div id="clients-section" class="mt-10 bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div class="bg-[#01B3BB] text-white px-6 py-4">
+        <h2 class="text-xl font-bold">Gestion des clients</h2>
+    </div>
+
+    <div class="p-6 overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b">
+                    <th class="text-left py-3 px-4">Nom</th>
+                    <th class="text-left py-3 px-4">Email</th>
+                    <th class="text-left py-3 px-4">Statut</th>
+                    <th class="text-left py-3 px-4">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($clients as $client)
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4">{{ $client->name }}</td>
+                    <td class="py-3 px-4">{{ $client->email }}</td>
+                    <td class="py-3 px-4">
+                        @if($client->is_active)
+                            <span class="text-green-600 font-semibold">Actif</span>
+                        @else
+                            <span class="text-red-600 font-semibold">Verrouillé</span>
+                        @endif
+                    </td>
+                    <td class="py-3 px-4">
+                        <form method="POST" action="{{ route('admin.clients.toggle', $client) }}">
+                            @csrf
+                            <button
+                                class="px-3 py-1 rounded text-white
+                                {{ $client->is_active ? 'bg-red-500' : 'bg-green-500' }}">
+                                {{ $client->is_active ? 'Verrouiller' : 'Déverrouiller' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
         <!-- recent activity -->
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <h3 class="text-lg font-bold text-[#1E1E1E] mb-4">Activité récente</h3>

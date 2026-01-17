@@ -28,6 +28,15 @@ class AuthenticatedSessionController extends Controller
 
     $request->session()->regenerate();
 
+     // 🔒 CLIENT VERROUILLÉ → BLOQUER ICI
+    if (Auth::user()->role === 'client' && Auth::user()->is_active == 0) {
+        Auth::logout();
+
+        return back()->withErrors([
+            'email' => 'Votre compte est verrouillé !',
+        ]);
+    }
+
     if (Auth::user()->isAdmin()) {
         return redirect()->route('admin.dashboard');
     }

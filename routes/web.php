@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware; // <- On inclut le middleware
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,5 +41,13 @@ Route::middleware(['auth'])->group(function () {
         return view('dashboard.client');
     })->middleware(RoleMiddleware::class . ':client')->name('client.dashboard');
 });
+
+
+Route::get('/admin/dashboard', [ClientController::class, 'index'])
+    ->name('admin.dashboard');
+
+Route::post('/admin/clients/{user}/toggle', [ClientController::class, 'toggle'])
+    ->name('admin.clients.toggle');
+
 
 require __DIR__.'/auth.php';
