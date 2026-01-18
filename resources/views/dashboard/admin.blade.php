@@ -185,64 +185,100 @@
                 </div>
             </div>
 
-            <!-- users management -->
+            <!-- employees management -->
             <div id="employes-section" class="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div class="bg-[#FFC62A] text-[#1E1E1E] px-6 py-4 flex justify-between items-center">
-                    <h2 class="text-xl font-bold">Utilisateurs récents</h2>
-                    <a href="#"
-   class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">Gérer les employés</a>
+                    <h2 class="text-xl font-bold">Liste des employés</h2>
+                    <a href="{{ route('admin.employees.create') }}" 
+                       class="flex items-center gap-2 bg-[#01B3BB] text-white px-4 py-2 rounded-xl hover:bg-[#008D94] transition">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                        </svg>
+                        Nouvel employé
+                    </a>
                 </div>
+                
+                <!-- employees list -->
                 <div class="p-6">
+                    @if(session('success'))
+                    <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <p class="text-green-700">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if(isset($employees) && $employees->count() > 0)
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead>
                                 <tr class="border-b border-gray-200">
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold">Utilisateur</th>
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold">Email</th>
-                                    <th class="text-left py-3 px-4 text-gray-600 font-semibold">Rôle</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 font-semibold">Statut</th>
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold">Inscription</th>
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold">Actions</th>
                                 </tr>
                             </thead>
-                           <!-- <tbody>
-                                @for($i = 1; $i <= 5; $i++)
+                            <tbody>
+                                @foreach($employees as $employee)
                                 <tr class="border-b border-gray-100 hover:bg-gray-50">
                                     <td class="py-4 px-4">
                                         <div class="flex items-center">
                                             <div class="w-8 h-8 bg-[#01B3BB] rounded-full flex items-center justify-center mr-3">
                                                 <span class="text-white text-xs font-bold">
-                                                    {{ chr(64 + $i) }}
+                                                    {{ strtoupper(substr($employee->name, 0, 1)) }}
                                                 </span>
                                             </div>
-                                            <span>Utilisateur {{ $i }}</span>
+                                            <span>{{ $employee->name }}</span>
                                         </div>
                                     </td>
-                                    <td class="py-4 px-4">user{{ $i }}@example.com</td>
+                                    <td class="py-4 px-4">{{ $employee->email }}</td>
                                     <td class="py-4 px-4">
-                                        @php
-                                            $roles = ['Admin', 'Employé', 'Client'];
-                                            $role = $roles[array_rand($roles)];
-                                            $roleColors = [
-                                                'Admin' => 'bg-purple-100 text-purple-800',
-                                                'Employé' => 'bg-blue-100 text-blue-800',
-                                                'Client' => 'bg-gray-100 text-gray-800'
-                                            ];
-                                        @endphp
-                                        <span class="text-xs font-medium px-2.5 py-0.5 rounded-full {{ $roleColors[$role] }}">
-                                            {{ $role }}
+                                        @if($employee->is_active ?? true)
+                                        <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-100 text-green-800">
+                                            Actif
                                         </span>
+                                        @else
+                                        <span class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-100 text-red-800">
+                                            Inactif
+                                        </span>
+                                        @endif
                                     </td>
-                                    <td class="py-4 px-4">{{ now()->subDays(rand(1, 30))->format('d/m/Y') }}</td>
+                                    <td class="py-4 px-4">{{ $employee->created_at->format('d/m/Y') }}</td>
                                     <td class="py-4 px-4">
-                                        <button class="text-sm text-[#01B3BB] hover:text-[#FFC62A] transition">
-                                            Gérer
-                                        </button>
+                                        <div class="flex flex-wrap gap-2">
+                                            <a href="{{ route('admin.employees.edit', $employee) }}"
+                                               class="text-xs px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition">
+                                                Modifier
+                                            </a>
+                                            
+                                            <form method="POST" action="{{ route('admin.employees.toggle', $employee) }}">
+                                                @csrf
+                                                <button type="submit" 
+                                                        class="text-xs px-3 py-1 rounded-full {{ ($employee->is_active ?? true) ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : 'bg-green-100 text-green-800 hover:bg-green-200' }} transition">
+                                                    {{ ($employee->is_active ?? true) ? 'Désactiver' : 'Activer' }}
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
-                                @endfor
-                            </tbody>-->
+                                @endforeach
+                            </tbody>
                         </table>
                     </div>
+                    @else
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0c-.223.447-.481.801-.78 1H22a2 2 0 002-2v-2a2 2 0 00-2-2h-1.28c-.299-.199-.557-.553-.78-1-.446-.894-1.048-1.5-1.78-1.5s-1.334.606-1.78 1.5c-.223.447-.481.801-.78 1H10a2 2 0 00-2 2v2a2 2 0 002 2h1.28c.299.199.557.553.78 1 .446.894 1.048 1.5 1.78 1.5s1.334-.606 1.78-1.5c.223-.447.481-.801.78-1H22a2 2 0 002-2v-2a2 2 0 00-2-2h-1.28z" />
+                        </svg>
+                        <p class="text-lg mb-2">Aucun employé trouvé</p>
+                        <p class="text-sm">Commencez par <a href="{{ route('admin.employees.create') }}" class="text-[#01B3BB] hover:underline">ajouter un nouvel employé</a></p>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -254,29 +290,29 @@
                 <h3 class="text-lg font-bold text-[#1E1E1E] mb-4">Actions rapides</h3>
                 <div class="space-y-3">
                     <a href="#clients-section" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-    <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
-        <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-        </svg>
-    </div>
-    <div>
-        <span class="font-medium block">Gérer les clients</span>
-        <span class="text-sm text-gray-500">verrouiller/déverrouiller</span>
-    </div>
-</a>
- <a href="#employes-section" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-    <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
-        <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-        </svg>
-    </div>
-    <div>
-        <span class="font-medium block">Gérer les employés & les admins</span>
-        <span class="text-sm text-gray-500">Ajouter/éditer/supprimer</span>
-    </div>
-</a>
-
+                        <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="font-medium block">Gérer les clients</span>
+                            <span class="text-sm text-gray-500">verrouiller/déverrouiller</span>
+                        </div>
+                    </a>
                     
+                    <a href="#employes-section" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                        <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="font-medium block">Gérer les employés & les admins</span>
+                            <span class="text-sm text-gray-500">Ajouter/éditer/supprimer</span>
+                        </div>
+                    </a>
+
                     <a href="#" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
                         <div class="w-10 h-10 bg-[#FFC62A]/10 rounded-lg flex items-center justify-center mr-3">
                             <svg class="w-5 h-5 text-[#FFC62A]" fill="currentColor" viewBox="0 0 20 20">
@@ -322,8 +358,6 @@
                 </div>
                 
                 <div class="space-y-3">
-                    
-                    
                     <a href="{{ route('profile.edit') }}" class="flex items-center justify-between p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
                         <span>Mon profil admin</span>
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -384,50 +418,50 @@
     <!-- system alerts -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         @if(isset($clients))
-<div id="clients-section" class="mt-10 bg-white rounded-2xl shadow-lg overflow-hidden">
-    <div class="bg-[#01B3BB] text-white px-6 py-4">
-        <h2 class="text-xl font-bold">Gestion des clients</h2>
-    </div>
+        <div id="clients-section" class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-[#01B3BB] text-white px-6 py-4">
+                <h2 class="text-xl font-bold">Gestion des clients</h2>
+            </div>
 
-    <div class="p-6 overflow-x-auto">
-        <table class="w-full">
-            <thead>
-                <tr class="border-b">
-                    <th class="text-left py-3 px-4">Nom</th>
-                    <th class="text-left py-3 px-4">Email</th>
-                    <th class="text-left py-3 px-4">Statut</th>
-                    <th class="text-left py-3 px-4">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($clients as $client)
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3 px-4">{{ $client->name }}</td>
-                    <td class="py-3 px-4">{{ $client->email }}</td>
-                    <td class="py-3 px-4">
-                        @if($client->is_active)
-                            <span class="text-green-600 font-semibold">Actif</span>
-                        @else
-                            <span class="text-red-600 font-semibold">Verrouillé</span>
-                        @endif
-                    </td>
-                    <td class="py-3 px-4">
-                        <form method="POST" action="{{ route('admin.clients.toggle', $client) }}">
-                            @csrf
-                            <button
-                                class="px-3 py-1 rounded text-white
-                                {{ $client->is_active ? 'bg-red-500' : 'bg-green-500' }}">
-                                {{ $client->is_active ? 'Verrouiller' : 'Déverrouiller' }}
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-@endif
+            <div class="p-6 overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3 px-4">Nom</th>
+                            <th class="text-left py-3 px-4">Email</th>
+                            <th class="text-left py-3 px-4">Statut</th>
+                            <th class="text-left py-3 px-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($clients as $client)
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4">{{ $client->name }}</td>
+                            <td class="py-3 px-4">{{ $client->email }}</td>
+                            <td class="py-3 px-4">
+                                @if($client->is_active)
+                                    <span class="text-green-600 font-semibold">Actif</span>
+                                @else
+                                    <span class="text-red-600 font-semibold">Verrouillé</span>
+                                @endif
+                            </td>
+                            <td class="py-3 px-4">
+                                <form method="POST" action="{{ route('admin.clients.toggle', $client) }}">
+                                    @csrf
+                                    <button
+                                        class="px-3 py-1 rounded text-white
+                                        {{ $client->is_active ? 'bg-red-500' : 'bg-green-500' }}">
+                                        {{ $client->is_active ? 'Verrouiller' : 'Déverrouiller' }}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
 
         <!-- recent activity -->
         <div class="bg-white rounded-2xl shadow-lg p-6">
