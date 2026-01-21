@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="eng">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Book Hub</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         .book-card:hover .hover-actions {
             opacity: 1;
@@ -54,6 +55,20 @@
             background: #FFC62A;
             border-radius: 4px;
             pointer-events: none;
+        }
+        
+        /* Dropdown styling */
+        .dropdown-content {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+        
+        .group:hover .dropdown-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
         }
     </style>
 </head>

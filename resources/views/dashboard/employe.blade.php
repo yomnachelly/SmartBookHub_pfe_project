@@ -264,7 +264,7 @@
                         </div>
                     </a>
                     
-                    <a href="#" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                    <a href="{{ route('employee.books.index') }}" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
                         <div class="w-10 h-10 bg-[#FFC62A]/10 rounded-lg flex items-center justify-center mr-3">
                             <svg class="w-5 h-5 text-[#FFC62A]" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
@@ -288,45 +288,6 @@
                             <span class="text-sm text-gray-500">Voir les rapports</span>
                         </div>
                     </a>
-                </div>
-            </div>
-
-            <!-- admin profile card -->
-            <div class="bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] rounded-2xl shadow-lg p-6 text-white">
-                <div class="flex items-center mb-6">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mr-4">
-                        <div class="w-14 h-14 bg-[#FFC62A] rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-[#1E1E1E]" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-lg">{{ Auth::user()->name }}</h4>
-                        <p class="text-white/80 text-sm">Administrateur Principal</p>
-                        <p class="text-white/60 text-xs mt-1">{{ Auth::user()->email }}</p>
-                    </div>
-                </div>
-                
-                <div class="space-y-3">
-                    
-                    
-                    <a href="{{ route('profile.edit') }}" class="flex items-center justify-between p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
-                        <span>Mon profil employé</span>
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                    </a>
-                    
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="w-full flex items-center justify-between p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
-                            <span>Déconnexion employé</span>
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                        </button>
-                    </form>
                 </div>
             </div>
 
@@ -410,32 +371,6 @@
                     </div>
                 </div>
                 @endfor
-            </div>
-        </div>
-
-        <!-- notifications -->
-        <div class="bg-gradient-to-r from-[#FFC62A] to-[#FFD666] rounded-2xl shadow-lg p-6">
-            <h3 class="text-lg font-bold text-[#1E1E1E] mb-4">Notifications</h3>
-            <div class="space-y-3">
-                <div class="flex items-center justify-between p-3 bg-white/20 rounded-xl">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3">
-                            <span class="text-[#FFC62A] text-sm font-bold">!</span>
-                        </div>
-                        <span class="text-[#1E1E1E] font-medium">5 commandes en attente</span>
-                    </div>
-                    <button class="text-[#01B3BB] text-sm hover:underline">Voir</button>
-                </div>
-                
-                <div class="flex items-center justify-between p-3 bg-white/20 rounded-xl">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3">
-                            <span class="text-[#FFC62A] text-sm font-bold">!</span>
-                        </div>
-                        <span class="text-[#1E1E1E] font-medium">3 livres en rupture</span>
-                    </div>
-                    <button class="text-[#01B3BB] text-sm hover:underline">Réapprovisionner</button>
-                </div>
             </div>
         </div>
     </div>

@@ -167,42 +167,6 @@
                     </a>
                 </div>
             </div>
-
-            <!-- profile -->
-            <div class="bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] rounded-2xl shadow-lg p-6 text-white">
-                <div class="flex items-center mb-4">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mr-4">
-                        <div class="w-14 h-14 bg-[#FFC62A] rounded-full flex items-center justify-center">
-                            <span class="text-[#1E1E1E] text-xl font-bold">
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-lg">{{ Auth::user()->name }}</h4>
-                        <p class="text-white/80 text-sm">{{ Auth::user()->email }}</p>
-                    </div>
-                </div>
-                
-                <div class="space-y-3">
-                    <a href="{{ route('profile.edit') }}" class="flex items-center justify-between p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
-                        <span>Éditer le profil</span>
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                    
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="w-full flex items-center justify-between p-3 bg-white/10 rounded-xl hover:bg-white/20 transition">
-                            <span>Déconnexion</span>
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                        </button>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
 

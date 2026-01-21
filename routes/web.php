@@ -5,11 +5,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\Admin\BookController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Employee\BookController as EmployeeBookController;
+use App\Http\Controllers\Employee\CategoryController as EmployeeCategoryController;
 
-
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::get('/', [Controller::class, 'welcome'])->name('welcome');
 
 // Dashboard générique (accessible après authentification)
 Route::get('/dashboard', function () {
@@ -34,30 +36,76 @@ Route::middleware(['auth'])->group(function () {
     })->middleware(RoleMiddleware::class . ':client')->name('client.dashboard');
 });
 
-// Admin routes group
-Route::middleware(['auth', RoleMiddleware::class . ':admin'])->prefix('admin')->group(function () {
-    // Admin dashboard
+// Employee routes
+Route::middleware(['auth', RoleMiddleware::class . ':employee'])->prefix('employee')->name('employee.')->group(function () {
+    // Books management
+    Route::prefix('books')->name('books.')->group(function () {
+        Route::get('/', [EmployeeBookController::class, 'index'])->name('index');
+        Route::get('/creer', [EmployeeBookController::class, 'create'])->name('create');
+        Route::post('/', [EmployeeBookController::class, 'store'])->name('store');
+        Route::get('/{livre}/modifier', [EmployeeBookController::class, 'edit'])->name('edit');
+        Route::put('/{livre}', [EmployeeBookController::class, 'update'])->name('update');
+        Route::delete('/{livre}', [EmployeeBookController::class, 'destroy'])->name('destroy');
+        Route::post('/{livre}/toggle-stock', [EmployeeBookController::class, 'toggleStock'])
+            ->name('toggle-stock');
+    });
+    
+    // Categories management
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [EmployeeCategoryController::class, 'index'])->name('index');
+        Route::get('/creer', [EmployeeCategoryController::class, 'create'])->name('create');
+        Route::post('/', [EmployeeCategoryController::class, 'store'])->name('store');
+        Route::get('/{category}/modifier', [EmployeeCategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [EmployeeCategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [EmployeeCategoryController::class, 'destroy'])->name('destroy');
+    });
+});
+
+// Admin routes
+Route::middleware(['auth', RoleMiddleware::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [EmployeeController::class, 'index'])
-        ->name('admin.dashboard');
+        ->name('dashboard');
     
-    // Client toggle route
+    // client toggle
     Route::post('/clients/{user}/toggle', [ClientController::class, 'toggle'])
-        ->name('admin.clients.toggle');
+        ->name('clients.toggle');
     
-    // Employee management routes
-    Route::prefix('employees')->group(function () {
+    // employees
+    Route::prefix('employees')->name('employees.')->group(function () {
         Route::get('/create', [EmployeeController::class, 'create'])
-            ->name('admin.employees.create');
+            ->name('create');
         Route::post('/', [EmployeeController::class, 'store'])
-            ->name('admin.employees.store');
+            ->name('store');
         Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])
-            ->name('admin.employees.edit');
+            ->name('edit');
         Route::put('/{employee}', [EmployeeController::class, 'update'])
-            ->name('admin.employees.update');
+            ->name('update');
         Route::delete('/{employee}', [EmployeeController::class, 'destroy'])
-            ->name('admin.employees.destroy');
+            ->name('destroy');
         Route::post('/{employee}/toggle', [EmployeeController::class, 'toggleActive'])
-            ->name('admin.employees.toggle');
+            ->name('toggle');
+    });
+
+    // books
+    Route::prefix('books')->name('books.')->group(function () {
+        Route::get('/', [BookController::class, 'index'])->name('index');
+        Route::get('/create', [BookController::class, 'create'])->name('create');
+        Route::post('/', [BookController::class, 'store'])->name('store');
+        Route::get('/{livre}/edit', [BookController::class, 'edit'])->name('edit');
+        Route::put('/{livre}', [BookController::class, 'update'])->name('update');
+        Route::delete('/{livre}', [BookController::class, 'destroy'])->name('destroy');
+        Route::post('/{livre}/toggle-stock', [BookController::class, 'toggleStock'])
+            ->name('toggle-stock');
+    });
+    
+    // categories
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
     });
 });
 
