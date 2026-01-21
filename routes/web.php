@@ -12,6 +12,7 @@ use App\Http\Controllers\Employee\BookController as EmployeeBookController;
 use App\Http\Controllers\Employee\CategoryController as EmployeeCategoryController;
 
 Route::get('/', [Controller::class, 'welcome'])->name('welcome');
+Route::get('/book/{id}', [Controller::class, 'show'])->name('book.show');
 
 // Dashboard générique (accessible après authentification)
 Route::get('/dashboard', function () {

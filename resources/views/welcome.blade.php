@@ -39,13 +39,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     @if(isset($livres) && count($livres) > 0)
                         @foreach($livres as $livre)
-                        <div class="book-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition relative">
+                        <div class="book-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition relative group cursor-pointer">
+                            <a href="{{ route('book.show', $livre->id_livre) }}" class="absolute inset-0 z-10"></a>
+                            
                             <div class="relative">
-                                <!-- afficher l'image du livre si elle existe -->
                                 @if($livre->image && file_exists(storage_path('app/public/' . $livre->image)))
                                     <img src="{{ asset('storage/' . $livre->image) }}" alt="{{ $livre->titre }}" class="w-full h-64 object-cover">
                                 @else
-                                    <!-- Image par défaut -->
                                     <div class="w-full h-64 bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] flex items-center justify-center">
                                         <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
@@ -53,10 +53,10 @@
                                     </div>
                                 @endif
                                 <div class="hover-actions absolute top-4 left-4 flex gap-2 opacity-0 invisible transition-all duration-300">
-                                    <button class="bg-[#FFC62A] text-[#1E1E1E] px-4 py-2 rounded-lg font-semibold hover:bg-[#FFD666] transition">
+                                    <button class="bg-[#FFC62A] text-[#1E1E1E] px-4 py-2 rounded-lg font-semibold hover:bg-[#FFD666] transition z-20 relative">
                                         Ajouter
                                     </button>
-                                    <button class="bg-white p-2 rounded-lg hover:bg-gray-100 transition">
+                                    <button class="bg-white p-2 rounded-lg hover:bg-gray-100 transition z-20 relative">
                                         <svg class="w-6 h-6 text-[#FFC62A]" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
                                         </svg>
@@ -67,11 +67,22 @@
                                 <h4 class="font-bold text-[#1E1E1E] mb-2 truncate">{{ $livre->titre }}</h4>
                                 <p class="text-[#FFC62A] font-bold text-lg">{{ number_format($livre->prix, 3) }} dt</p>
                                 <p class="text-gray-600 text-sm">{{ $livre->auteur }}</p>
-                                @if($livre->categorie)
-                                    <p class="text-gray-500 text-xs mt-1">{{ $livre->categorie }}</p>
-                                @endif
+                                <div class="mt-1">
+                                    @if($livre->categories && $livre->categories->count() > 0)
+                                        @foreach($livre->categories->take(2) as $categorie)
+                                            <span class="inline-block text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full mr-1">
+                                                {{ $categorie->nom_categ }}
+                                            </span>
+                                        @endforeach
+                                        @if($livre->categories->count() > 2)
+                                            <span class="text-xs text-gray-500">+{{ $livre->categories->count() - 2 }} plus</span>
+                                        @endif
+                                    @elseif($livre->categorie)
+                                        <span class="text-gray-500 text-xs">{{ $livre->categorie }}</span>
+                                    @endif
+                                </div>
                                 
-                                <!-- Stock status -->
+                                <!-- stock -->
                                 <div class="mt-2">
                                     @if($livre->stock > 0)
                                         <span class="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800">
@@ -87,7 +98,6 @@
                         </div>
                         @endforeach
                     @else
-                        <!-- si aucun livre n'est trouvé -->
                         <div class="col-span-4 text-center py-12">
                             <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>

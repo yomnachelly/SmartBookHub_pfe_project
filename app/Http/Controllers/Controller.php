@@ -106,4 +106,20 @@ class Controller extends \Illuminate\Routing\Controller
         
         return $ranges;
     }
+
+    public function show($id)
+    {
+        $livre = Livre::with('categories')->findOrFail($id);
+        
+        //related books
+        $relatedBooks = Livre::whereHas('categories', function($q) use ($livre) {
+            $q->whereIn('categories.id_categ', $livre->categories->pluck('id_categ'));
+        })
+        ->where('id_livre', '!=', $id)
+        ->where('stock', '>', 0)
+        ->limit(4)
+        ->get();
+        
+        return view('books.show', compact('livre', 'relatedBooks'));
+    }
 }
