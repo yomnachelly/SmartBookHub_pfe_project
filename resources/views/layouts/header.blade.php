@@ -25,6 +25,32 @@
                     A propos
                 </a>
             </li>
+            <!-- Dans votre header -->
+<li>
+    <a href="{{ route('panier.index') }}" class="relative hover:text-[#FFC62A] transition group">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+        </svg>
+        @php
+            // Compter les articles dans le panier session
+            $panierCount = 0;
+            $panier = session('panier', []);
+            foreach ($panier as $item) {
+                $panierCount += $item['quantite'] ?? 0;
+            }
+        @endphp
+        @if($panierCount > 0)
+        <span class="absolute -top-2 -right-2 bg-[#FFC62A] text-[#1E1E1E] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            {{ $panierCount }}
+        </span>
+        @endif
+        <!-- Tooltip -->
+        <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Mon Panier
+        </span>
+    </a>
+</li>
+            
             <li>
                 <a href="#" class="flex items-center gap-2 hover:text-[#FFC62A] transition">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -112,6 +138,7 @@
                 </li>
                 @endif
             @else
+            
                 <!-- User is not logged in -->
                 <li>
                     <a href="{{ route('login') }}" class="flex items-center gap-2 hover:text-[#FFC62A] transition">
@@ -122,14 +149,10 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="relative hover:text-[#FFC62A] transition">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
-                        </svg>
-                        <span class="absolute -top-2 -right-2 bg-[#FFC62A] text-[#1E1E1E] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"></span>
-                    </a>
+                   
                 </li>
             @endauth          
         </ul>
+        
     </nav>
 </header>

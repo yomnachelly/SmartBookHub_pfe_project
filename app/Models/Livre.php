@@ -31,4 +31,10 @@ class Livre extends Model
     {
         return $this->belongsToMany(Categorie::class, 'livres_categories', 'id_livre', 'id_categ');
     }
+    public function commandes()
+{
+    return $this->belongsToMany(Commande::class, 'commande_livre', 'livre_id', 'commande_id')
+                ->withPivot('quantite', 'prix');
+}
+
 }

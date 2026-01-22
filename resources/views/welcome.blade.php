@@ -53,12 +53,27 @@
                                     </div>
                                 @endif
                                 <div class="hover-actions absolute top-4 left-4 flex gap-2 opacity-0 invisible transition-all duration-300">
-                                    <button class="bg-[#FFC62A] text-[#1E1E1E] px-4 py-2 rounded-lg font-semibold hover:bg-[#FFD666] transition z-20 relative">
-                                        Ajouter
+                                    <!-- CORRECTION: Bouton Ajouter au panier -->
+                                    @if($livre->stock > 0)
+                                    <form method="POST" action="{{ route('panier.ajouter', $livre->id_livre) }}" class="z-20 relative">
+                                        @csrf
+                                        <button type="submit" class="bg-[#FFC62A] text-[#1E1E1E] px-4 py-2 rounded-lg font-semibold hover:bg-[#FFD666] transition flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
+                                            </svg>
+                                            Ajouter
+                                        </button>
+                                    </form>
+                                    @else
+                                    <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed" disabled>
+                                        Rupture
                                     </button>
-                                    <button class="bg-white p-2 rounded-lg hover:bg-gray-100 transition z-20 relative">
-                                        <svg class="w-6 h-6 text-[#FFC62A]" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                                    @endif
+                                    
+                                    <!-- Bouton favoris (optionnel) -->
+                                    <button class="bg-white p-2 rounded-lg hover:bg-gray-100 transition z-20 relative favorite-btn" data-livre-id="{{ $livre->id_livre }}">
+                                        <svg class="w-6 h-6 text-[#FFC62A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                         </svg>
                                     </button>
                                 </div>
@@ -338,38 +353,139 @@
             });
         });
         
-        document.querySelectorAll('.book-card .bg-\\[\\#FFC62A\\]').forEach(button => {
+        // Gestion du bouton "Ajouter au panier"
+        document.querySelectorAll('.book-card form[action*="panier.ajouter"] button').forEach(button => {
             button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const card = this.closest('.book-card');
-                const title = card.querySelector('h4').textContent;
-                const price = card.querySelector('.text-lg').textContent;
+                e.stopPropagation(); // Empêche le clic de se propager au lien de la carte
                 
-                alert(`"${title}" ajouté au panier!\nPrix: ${price}`);
+                // Désactiver le bouton pendant l'envoi
+                const originalText = this.innerHTML;
+                this.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+                this.disabled = true;
+                
+                // Soumettre le formulaire
+                const form = this.closest('form');
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: new URLSearchParams(new FormData(form))
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Réactiver le bouton
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                    
+                    // Afficher un message de succès
+                    if (data.success) {
+                        // Animation d'ajout
+                        this.classList.add('bg-green-500');
+                        this.classList.remove('bg-[#FFC62A]', 'hover:bg-[#FFD666]');
+                        
+                        // Mettre à jour le compteur du panier dans le header
+                        updateCartCount(data.cart_count);
+                        
+                        setTimeout(() => {
+                            this.classList.remove('bg-green-500');
+                            this.classList.add('bg-[#FFC62A]', 'hover:bg-[#FFD666]');
+                        }, 1000);
+                        
+                        // Notification
+                        showNotification('success', data.message || 'Livre ajouté au panier!');
+                    } else {
+                        showNotification('error', data.message || 'Erreur lors de l\'ajout');
+                    }
+                })
+                .catch(error => {
+                    // Réactiver le bouton en cas d'erreur
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                    showNotification('error', 'Erreur réseau');
+                });
             });
         });
         
-        // wishlist btn
-        document.querySelectorAll('.book-card .bg-white').forEach(button => {
+        // Bouton favoris
+        document.querySelectorAll('.favorite-btn').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
+                
                 const svg = this.querySelector('svg');
                 const card = this.closest('.book-card');
                 const title = card.querySelector('h4').textContent;
                 
-                // heart fill
+                // Animation coeur
                 const isFilled = svg.getAttribute('fill') === 'currentColor';
                 if (isFilled) {
                     svg.setAttribute('fill', 'none');
-                    svg.innerHTML = '<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>';
-                    alert(`"${title}" retiré des favoris`);
+                    svg.setAttribute('stroke', 'currentColor');
+                    svg.setAttribute('stroke-width', '2');
+                    showNotification('info', `"${title}" retiré des favoris`);
                 } else {
                     svg.setAttribute('fill', 'currentColor');
-                    svg.innerHTML = '<path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>';
-                    alert(`"${title}" ajouté aux favoris!`);
+                    svg.removeAttribute('stroke');
+                    svg.removeAttribute('stroke-width');
+                    showNotification('success', `"${title}" ajouté aux favoris!`);
                 }
             });
         });
+        
+        // Fonction pour mettre à jour le compteur du panier
+        function updateCartCount(count) {
+            const cartBadge = document.querySelector('header .bg-\\[\\#FFC62A\\]');
+            if (cartBadge) {
+                cartBadge.textContent = count;
+                if (count > 0) {
+                    cartBadge.classList.remove('hidden');
+                } else {
+                    cartBadge.classList.add('hidden');
+                }
+            }
+        }
+        
+        // Fonction pour afficher les notifications
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-100 text-green-800 border border-green-300' :
+                type === 'error' ? 'bg-red-100 text-red-800 border border-red-300' :
+                'bg-blue-100 text-blue-800 border border-blue-300'
+            }`;
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        ${type === 'success' ? 
+                            '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>' :
+                        type === 'error' ?
+                            '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>' :
+                            '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>'
+                        }
+                    </svg>
+                    <span>${message}</span>
+                    <button class="ml-4 text-gray-500 hover:text-gray-700" onclick="this.parentElement.parentElement.remove()">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove après 3 secondes
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
+        }
     });
 </script>
 
@@ -394,6 +510,15 @@
     
     input[type="number"] {
         -moz-appearance: textfield;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .animate-spin {
+        animation: spin 1s linear infinite;
     }
 </style>
 @endsection

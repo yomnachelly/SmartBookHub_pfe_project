@@ -109,5 +109,51 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->prefix('admin')->
         Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
     });
 });
+use App\Http\Controllers\CommandeController;
+
+// ================= COMMANDES =================
+Route::middleware('auth')->group(function () {
+
+    // Admin commandes
+    Route::prefix('admin')->name('admin.')->middleware(RoleMiddleware::class . ':admin')->group(function () {
+        Route::get('/commandes', [CommandeController::class, 'indexAdmin'])->name('commandes.index');
+        Route::get('/commandes/{id}', [CommandeController::class, 'showAdmin'])->name('commandes.show');
+        Route::post('/commandes/{id}/valider', [CommandeController::class, 'valider'])->name('commandes.valider');
+        Route::post('/commandes/{id}/annuler', [CommandeController::class, 'annuler'])->name('commandes.annuler');
+    });
+
+    // Employé commandes
+    Route::prefix('employe')->name('employe.')->middleware(RoleMiddleware::class . ':employe')->group(function () {
+        Route::get('/commandes', [CommandeController::class, 'indexEmploye'])->name('commandes.index');
+        Route::get('/commandes/{id}', [CommandeController::class, 'showEmploye'])->name('commandes.show');
+        Route::post('/commandes/{id}/valider', [CommandeController::class, 'valider'])->name('commandes.valider');
+        Route::post('/commandes/{id}/annuler', [CommandeController::class, 'annuler'])->name('commandes.annuler');
+    });
+
+
+    
+    // Panier client
+    Route::get('/panier', [CommandeController::class, 'panier'])->name('panier');
+    Route::post('/panier/ajouter/{livre_id}', [CommandeController::class, 'ajouterAuPanier'])->name('panier.ajouter');
+    Route::post('/commande/valider', [CommandeController::class, 'validerCommande'])->name('commande.valider');
+});
+// ================= PANIER (accessible sans auth) =================
+Route::prefix('panier')->name('panier.')->group(function () {
+    Route::get('/', [CommandeController::class, 'panier'])->name('index');
+    Route::post('/ajouter/{livre_id}', [CommandeController::class, 'ajouterAuPanier'])->name('ajouter');
+    Route::delete('/retirer/{livre_id}', [CommandeController::class, 'retirerDuPanier'])->name('retirer');
+    Route::put('/maj-quantite/{livre_id}', [CommandeController::class, 'majQuantite'])->name('maj-quantite');
+    Route::post('/vider', [CommandeController::class, 'viderPanier'])->name('vider');
+});
+
+// ================= COMMANDE =================
+Route::post('/commande/valider', [CommandeController::class, 'validerCommande'])->name('commande.valider');
+Route::get('/commande/confirmation', [CommandeController::class, 'confirmation'])->name('commande.confirmation');
+
+// ================= COMMANDES CLIENT =================
+Route::middleware('auth')->group(function () {
+    Route::get('/mes-commandes', [CommandeController::class, 'mesCommandes'])->name('commandes.mes-commandes');
+    Route::get('/mes-commandes/{id}', [CommandeController::class, 'showClient'])->name('commandes.show');
+});
 
 require __DIR__.'/auth.php';

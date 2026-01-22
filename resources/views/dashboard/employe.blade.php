@@ -275,7 +275,18 @@
                             <span class="text-sm text-gray-500">Ajouter/modifier/supprimer</span>
                         </div>
                     </a>
-                    
+                       <a href="{{ route('employe.commandes.index') }}" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+    <div class="w-10 h-10 bg-[#01B3BB]/10 rounded-lg flex items-center justify-center mr-3">
+        <svg class="w-5 h-5 text-[#01B3BB]" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 3h2l.4 2M7 13h10l1-5H8.4M7 13L5.5 6H19M7 13l-2 5m2-5h12m-4 0v5" />
+        </svg>
+    </div>
+    <div>
+        <span class="font-medium block">Gérer les commandes</span>
+        <span class="text-sm text-gray-500">Voir/éditer les commandes</span>
+    </div>
+</a>
+
                     <a href="#" class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
                         <div class="w-10 h-10 bg-[#4ECFD7]/10 rounded-lg flex items-center justify-center mr-3">
                             <svg class="w-5 h-5 text-[#4ECFD7]" fill="currentColor" viewBox="0 0 20 20">
