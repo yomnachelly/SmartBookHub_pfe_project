@@ -12,6 +12,7 @@
             </div>
             <h1 class="text-2xl font-bold text-green-800 mb-2">Commande confirmée!</h1>
             <p class="text-green-700">Votre commande a été enregistrée avec succès.</p>
+            
             <p class="text-green-700 mt-1">Numéro de commande: <strong>#{{ str_pad($commande->id, 6, '0', STR_PAD_LEFT) }}</strong></p>
         </div>
 
@@ -41,8 +42,8 @@
                             </span>
                         </p>
                         <p class="text-gray-600">Statut: 
-                            <span class="font-medium text-{{ $commande->statut == 'en_attente' ? 'yellow' : 'green' }}-600">
-                                {{ ucfirst($commande->statut) }}
+                            <span class="font-medium {{ $commande->statut == 'en_attente' ? 'text-yellow-600' : ($commande->statut == 'confirme' ? 'text-green-600' : 'text-gray-600') }}">
+                                {{ ucfirst(str_replace('_', ' ', $commande->statut)) }}
                             </span>
                         </p>
                     </div>
@@ -72,7 +73,9 @@
                     </div>
                     @endforeach
                 </div>
-                
+                 <p class="text-green-600 mt-3 font-medium">
+                Un email de confirmation avec votre facture vous sera envoyé .
+            </p>
                 <!-- Total -->
                 <div class="mt-6 pt-4 border-t">
                     <div class="flex justify-between text-lg font-bold">
@@ -91,4 +94,17 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l1-5H8.4M7 13l-2 5m2-5h12m-4 0v5"/>
                 </svg>
                 Continuer mes achats
-            </
+            </a>
+            
+            <!-- Removed the problematic route that doesn't exist -->
+            <a href="{{ url('/') }}" 
+               class="bg-white border border-[#01B3BB] text-[#01B3BB] px-6 py-3 rounded-xl font-medium hover:bg-[#01B3BB] hover:text-white transition flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+@endsection

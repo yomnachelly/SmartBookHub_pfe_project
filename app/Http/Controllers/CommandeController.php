@@ -11,248 +11,232 @@ use Illuminate\Support\Facades\Session;
 
 class CommandeController extends Controller
 {
-     // ================= PANIER (SESSION POUR TOUS) =================
-    
+    // ================= UTILITAIRES PANIER =================
+
     private function getPanierSession()
     {
         return Session::get('panier', []);
     }
-    
+
     private function savePanierSession($panier)
     {
         Session::put('panier', $panier);
         Session::save();
     }
-    
+
+    private function calculerTotal()
+    {
+        $panier = $this->getPanierSession();
+        $total = 0;
+
+        foreach ($panier as $item) {
+            $total += $item['prix'] * $item['quantite'];
+        }
+
+        return $total;
+    }
+
+    // ================= FORMULAIRE COMMANDE =================
+
+    public function formulaire()
+    {
+        $panier = $this->getPanierSession();
+
+        if (empty($panier)) {
+            return redirect()->route('panier.index')
+                ->with('error', 'Votre panier est vide');
+        }
+
+        return view('panier.formulaire', compact('panier'));
+    }
+
+    public function creerCommande(Request $request)
+    {
+        $panier = $this->getPanierSession();
+
+        if (empty($panier)) {
+            return redirect()->route('panier.index')
+                ->with('error', 'Votre panier est vide');
+        }
+
+        $commande = Commande::create([
+            'user_id'       => Auth::id(),
+            'nom_client'    => $request->nom_client,
+            'email'         => $request->email,
+            'telephone'     => $request->telephone,
+            'adresse'       => $request->adresse,
+            'mode_paiement' => $request->mode_paiement,
+            'total'         => $this->calculerTotal(),
+            'statut'        => 'en_attente',
+        ]);
+
+        foreach ($panier as $item) {
+            DB::table('commande_livre')->insert([
+                'commande_id' => $commande->id,
+                'livre_id'    => $item['livre_id'],
+                'quantite'    => $item['quantite'],
+                'prix'        => $item['prix'],
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+        }
+
+        $this->savePanierSession([]);
+        Session::put('derniere_commande_id', $commande->id);
+
+        return redirect()->route('commande.confirmation');
+    }
+
+    public function confirmation()
+    {
+        $commandeId = Session::get('derniere_commande_id');
+        $commande = $commandeId ? Commande::find($commandeId) : null;
+
+        return view('panier.confirmation', compact('commande'));
+
+    }
+
+    // ================= PANIER =================
+
     public function ajouterAuPanier($livre_id)
     {
         $livre = Livre::findOrFail($livre_id);
         $panier = $this->getPanierSession();
-        
-        // Vérifier si le livre existe déjà dans le panier
+
         if (isset($panier[$livre_id])) {
             $panier[$livre_id]['quantite'] += 1;
         } else {
             $panier[$livre_id] = [
                 'livre_id' => $livre_id,
                 'quantite' => 1,
-                'prix' => $livre->prix,
-                'titre' => $livre->titre,
-                'auteur' => $livre->auteur,
-                'image' => $livre->image
+                'prix'     => $livre->prix,
+                'titre'    => $livre->titre,
+                'auteur'   => $livre->auteur,
+                'image'    => $livre->image,
             ];
         }
-        
+
         $this->savePanierSession($panier);
-        
-        return redirect()->back()->with('success', 'Livre ajouté au panier!');
+
+        return back()->with('success', 'Livre ajouté au panier');
     }
-    
-    // REMPLACER CETTE MÉTHODE PAR LA NOUVELLE VERSION :
+
     public function panier()
-    {
-        $panier = $this->getPanierSession();
-        $items = [];
-        $total = 0;
-        
-        if (!empty($panier)) {
-            // Récupérer tous les livres en une seule requête
-            $livreIds = array_column($panier, 'livre_id');
-            $livres = Livre::whereIn('id_livre', $livreIds)
-                ->select('id_livre', 'stock')
-                ->get()
-                ->keyBy('id_livre');
-            
-            foreach ($panier as $item) {
-                $livreStock = $livres[$item['livre_id']]->stock ?? 0;
-                
-                $sousTotal = $item['quantite'] * $item['prix'];
-                $total += $sousTotal;
-                
-                $items[] = (object) [
-                    'id_livre' => $item['livre_id'],
-                    'titre' => $item['titre'],
-                    'auteur' => $item['auteur'],
-                    'prix' => $item['prix'],
-                    'image' => $item['image'],
-                    'quantite' => $item['quantite'],
-                    'sous_total' => $sousTotal,
-                    'stock' => $livreStock // Ajouter le stock
-                ];
-            }
-        }
-        
-        return view('panier.index', [
-            'items' => collect($items),
-            'total' => $total,
-            'panierVide' => empty($panier)
-        ]);
+{
+    $panier = $this->getPanierSession();
+    $items = [];
+    $total = 0;
+
+    // Récupérer tous les livres du panier en une seule requête pour éviter trop de requêtes
+    $livres = Livre::whereIn('id_livre', array_column($panier, 'livre_id'))
+                   ->get()
+                   ->keyBy('id_livre'); // clé = id_livre pour accès rapide
+
+    foreach ($panier as $item) {
+        // Vérifier si le livre existe toujours
+        $livreStock = isset($livres[$item['livre_id']]) ? $livres[$item['livre_id']]->stock : 0;
+
+        $sousTotal = $item['quantite'] * $item['prix'];
+        $total += $sousTotal;
+
+        $items[] = (object) [
+            'id_livre'   => $item['livre_id'],
+            'titre'      => $item['titre'],
+            'auteur'     => $item['auteur'],
+            'prix'       => $item['prix'],
+            'image'      => $item['image'],
+            'quantite'   => $item['quantite'],
+            'sous_total' => $sousTotal,
+            'stock'      => $livreStock, // stock correct
+        ];
     }
-    
-    // ================= GESTION PANIER =================
-    
-  public function retirerDuPanier($livre_id)
+
+    return view('panier.index', [
+        'items'      => collect($items),
+        'total'      => $total,
+        'panierVide' => empty($panier),
+    ]);
+}
+public function viderPanier()
+{
+    // Vider le panier stocké en session
+    $this->savePanierSession([]);
+
+    return redirect()->route('panier.index')->with('success', 'Panier vidé avec succès !');
+}
+
+    public function retirerDuPanier($livre_id)
     {
         $panier = $this->getPanierSession();
-        
+
         if (isset($panier[$livre_id])) {
             unset($panier[$livre_id]);
             $this->savePanierSession($panier);
         }
-        
-        return redirect()->route('panier.index')->with('success', 'Livre retiré du panier!');
+
+        return redirect()->route('panier.index');
     }
-    
+
     public function majQuantite(Request $request, $livre_id)
     {
         $request->validate([
-            'quantite' => 'required|integer|min:1'
+            'quantite' => 'required|integer|min:1',
         ]);
-        
+
         $panier = $this->getPanierSession();
-        
+
         if (isset($panier[$livre_id])) {
             $panier[$livre_id]['quantite'] = $request->quantite;
             $this->savePanierSession($panier);
         }
-        
-        return redirect()->route('panier.index')->with('success', 'Quantité mise à jour!');
+
+        return redirect()->route('panier.index');
     }
-    
-    // ================= VALIDATION COMMANDE =================
-    
-    public function validerCommande(Request $request)
+
+    // ================= COMMANDES CLIENT =================
+
+    public function mesCommandes()
     {
-        $request->validate([
-            'nom_client' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'telephone' => 'required|string|max:20',
-            'adresse' => 'required|string',
-        ]);
-        
-        $panier = $this->getPanierSession();
-        
-        if (empty($panier)) {
-            return redirect()->route('panier.index')->with('error', 'Votre panier est vide!');
-        }
-        
-        // Calculer le total
-        $total = 0;
-        foreach ($panier as $item) {
-            $total += $item['quantite'] * $item['prix'];
-        }
-        
-        // Créer la commande
-        $commande = Commande::create([
-            'user_id' => Auth::id(), // null si visiteur
-            'nom_client' => $request->nom_client,
-            'email' => $request->email,
-            'telephone' => $request->telephone,
-            'adresse' => $request->adresse,
-            'total' => $total,
-            'statut' => 'en_attente'
-        ]);
-        
-        // Ajouter les livres à la commande
-        foreach ($panier as $item) {
-            DB::table('commande_livre')->insert([
-                'commande_id' => $commande->id,
-                'livre_id' => $item['livre_id'],
-                'quantite' => $item['quantite'],
-                'prix' => $item['prix'],
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-        
-        // Vider le panier session
-        $this->savePanierSession([]);
-        
-        // Stocker l'ID de commande pour la page de confirmation
-        Session::put('derniere_commande_id', $commande->id);
-        
-        return redirect()->route('commande.confirmation')->with('success', 'Commande passée avec succès!');
-    }
-    
-    public function confirmation()
-    {
-        $commandeId = Session::get('derniere_commande_id');
-        $commande = $commandeId ? Commande::find($commandeId) : null;
-        
-        return view('commande.confirmation', compact('commande'));
-    }
-    
-    // ================= RESTE DU CODE (ADMIN/EMPLOYÉ) =================
-    
-    public function indexAdmin()
-    {
-        $commandes = Commande::where('statut', '!=', 'en_panier')
+        $commandes = Commande::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
+        return view('client.commandes.index', compact('commandes'));
+    }
+
+    public function showClient($id)
+    {
+        $commande = Commande::with('livres')
+            ->where('user_id', Auth::id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        return view('client.commandes.show', compact('commande'));
+    }
+
+    // ================= ADMIN / EMPLOYÉ =================
+
+    public function indexAdmin()
+    {
+        $commandes = Commande::orderBy('created_at', 'desc')->get();
         return view('admin.commandes.index', compact('commandes'));
     }
-    
+
     public function showAdmin($id)
     {
         $commande = Commande::with('livres')->findOrFail($id);
         return view('admin.commandes.show', compact('commande'));
     }
-    
-    public function indexEmploye()
-    {
-        $commandes = Commande::where('statut', '!=', 'en_panier')
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        return view('employe.commandes.index', compact('commandes'));
-    }
-    
-    public function showEmploye($id)
-    {
-        $commande = Commande::with('livres')->findOrFail($id);
-        return view('employe.commandes.show', compact('commande'));
-    }
-    
+
     public function valider($id)
     {
         Commande::findOrFail($id)->update(['statut' => 'validee']);
-        return back()->with('success', 'Commande validée');
+        return back();
     }
-    
+
     public function annuler($id)
     {
         Commande::findOrFail($id)->update(['statut' => 'annulee']);
-        return back()->with('success', 'Commande annulée');
-    }
-    
-    // ================= COMMANDES CLIENT =================
-    
-    public function mesCommandes()
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('info', 'Veuillez vous connecter pour voir vos commandes.');
-        }
-        
-        $commandes = Commande::where('user_id', Auth::id())
-            ->where('statut', '!=', 'en_panier')
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        return view('client.commandes.index', compact('commandes'));
-    }
-    
-    public function showClient($id)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-        
-        $commande = Commande::with('livres')
-            ->where('user_id', Auth::id())
-            ->where('id', $id)
-            ->firstOrFail();
-            
-        return view('client.commandes.show', compact('commande'));
+        return back();
     }
 }

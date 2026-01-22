@@ -149,11 +149,16 @@ Route::prefix('panier')->name('panier.')->group(function () {
 // ================= COMMANDE =================
 Route::post('/commande/valider', [CommandeController::class, 'validerCommande'])->name('commande.valider');
 Route::get('/commande/confirmation', [CommandeController::class, 'confirmation'])->name('commande.confirmation');
+Route::get('/panier/formulaire', [CommandeController::class, 'formulaire'])
+    ->name('panier.formulaire');
 
 // ================= COMMANDES CLIENT =================
 Route::middleware('auth')->group(function () {
     Route::get('/mes-commandes', [CommandeController::class, 'mesCommandes'])->name('commandes.mes-commandes');
     Route::get('/mes-commandes/{id}', [CommandeController::class, 'showClient'])->name('commandes.show');
 });
+Route::post('/panier/valider-commande', [CommandeController::class, 'creerCommande'])
+    ->name('panier.valider-commande');
+Route::post('/panier/vider', [CommandeController::class, 'viderPanier'])->name('panier.vider');
 
 require __DIR__.'/auth.php';
