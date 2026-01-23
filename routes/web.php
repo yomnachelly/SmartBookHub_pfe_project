@@ -161,4 +161,15 @@ Route::post('/panier/valider-commande', [CommandeController::class, 'creerComman
     ->name('panier.valider-commande');
 Route::post('/panier/vider', [CommandeController::class, 'viderPanier'])->name('panier.vider');
 
+use App\Http\Controllers\StripeController;
+
+Route::post('/stripe/checkout/{commande}', [StripeController::class, 'checkout'])
+    ->name('stripe.checkout');
+
+Route::get('/stripe/success', [StripeController::class, 'success'])
+    ->name('stripe.success');
+
+Route::get('/stripe/cancel', [StripeController::class, 'cancel'])
+    ->name('stripe.cancel');
+
 require __DIR__.'/auth.php';

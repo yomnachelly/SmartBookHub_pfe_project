@@ -85,7 +85,8 @@
                 </div>
             </div>
         </div>
-        
+      
+
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('welcome') }}" 
@@ -104,6 +105,18 @@
                 </svg>
                 Retour à l'accueil
             </a>
+
+              @if($commande->mode_paiement === 'ligne' && $commande->payment_status === 'pending')
+<form method="POST" action="{{ route('stripe.checkout', $commande->id) }}">
+    @csrf
+    <button 
+        type="submit"
+        class="bg-[#01B3BB] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#008D94] transition flex items-center justify-center gap-2"
+    >
+        💳 Payer maintenant
+    </button>
+</form>
+@endif
         </div>
     </div>
 </div>
