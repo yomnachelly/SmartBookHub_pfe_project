@@ -41,7 +41,6 @@
                 </div>
             </div>
 
-            <!-- Book -->
             <div class="md:w-2/3 p-8">
                 <div class="border-b border-gray-200 pb-6 mb-6">
                     <h1 class="text-3xl font-bold text-[#1E1E1E] mb-2">{{ $livre->titre }}</h1>
@@ -87,12 +86,15 @@
 
                 <div class="flex gap-4">
                     @if($livre->stock > 0)
-                    <button class="flex-1 bg-[#FFC62A] text-[#1E1E1E] px-6 py-4 rounded-xl font-bold hover:bg-[#FFD666] transition flex items-center justify-center gap-3">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        Ajouter au panier
-                    </button>
+                    <form action="{{ route('panier.ajouter', $livre->id_livre) }}" method="POST" class="flex-1">
+                        @csrf
+                        <button type="submit" class="w-full bg-[#FFC62A] text-[#1E1E1E] px-6 py-4 rounded-xl font-bold hover:bg-[#FFD666] transition flex items-center justify-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            Ajouter au panier
+                        </button>
+                    </form>
                     @endif
                     
                     <button class="px-6 py-4 border-2 border-[#FFC62A] text-[#FFC62A] rounded-xl font-bold hover:bg-[#FFC62A]/10 transition flex items-center justify-center gap-3">
@@ -144,7 +146,6 @@
         </div>
     </div>
 
-    <!-- related -->
     @if(isset($relatedBooks) && $relatedBooks->count() > 0)
     <div class="mt-12">
         <h2 class="text-2xl font-bold text-[#1E1E1E] mb-6">Livres similaires</h2>
@@ -212,13 +213,6 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        document.querySelector('.bg-\\[\\#FFC62A\\]').addEventListener('click', function(e) {
-            e.preventDefault();
-            const title = "{{ $livre->titre }}";
-            const price = "{{ number_format($livre->prix, 3) }} dt";
-            alert(`"${title}" ajouté au panier!\nPrix: ${price}`);
-        });
-        
         document.querySelector('.border-\\[\\#FFC62A\\]').addEventListener('click', function(e) {
             e.preventDefault();
             const svg = this.querySelector('svg');

@@ -14,6 +14,34 @@
             <p class="text-green-700">Votre commande a été enregistrée avec succès.</p>
             
             <p class="text-green-700 mt-1">Numéro de commande: <strong>#{{ str_pad($commande->id, 6, '0', STR_PAD_LEFT) }}</strong></p>
+            
+            <!-- Invoice Download Button -->
+            <div class="mt-4">
+                <a href="{{ route('commandes.facture', $commande->id) }}" 
+                   class="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16l-4-4m0 0l4-4m-4 4h8m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Télécharger la facture
+                </a>
+                
+                <!-- Email status notification -->
+                @if(isset($invoiceSent) && $invoiceSent)
+                <p class="text-green-600 mt-2 text-sm">
+                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Une copie de la facture a été envoyée à {{ $customerEmail ?? $commande->email }}
+                </p>
+                @elseif(isset($invoiceSent) && !$invoiceSent)
+                <p class="text-yellow-600 mt-2 text-sm">
+                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    L'email de facture n'a pas pu être envoyé. Téléchargez votre facture ci-dessus.
+                </p>
+                @endif
+            </div>
         </div>
 
         <!-- Détails de la commande -->
@@ -73,9 +101,11 @@
                     </div>
                     @endforeach
                 </div>
-                 <p class="text-green-600 mt-3 font-medium">
-                Un email de confirmation avec votre facture vous sera envoyé .
-            </p>
+                
+                <p class="text-green-600 mt-3 font-medium">
+                    Un email de confirmation avec votre facture vous sera envoyé.
+                </p>
+                
                 <!-- Total -->
                 <div class="mt-6 pt-4 border-t">
                     <div class="flex justify-between text-lg font-bold">
@@ -85,10 +115,9 @@
                 </div>
             </div>
         </div>
-      
 
         <!-- Actions -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">         
             <a href="{{ route('welcome') }}" 
                class="bg-[#01B3BB] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#008D94] transition flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,27 +126,36 @@
                 Continuer mes achats
             </a>
             
-            <!-- Removed the problematic route that doesn't exist -->
-            <a href="{{ url('/') }}" 
-               class="bg-white border border-[#01B3BB] text-[#01B3BB] px-6 py-3 rounded-xl font-medium hover:bg-[#01B3BB] hover:text-white transition flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            @if($commande->mode_paiement === 'ligne' && $commande->payment_status === 'pending')
+            <form method="POST" action="{{ route('stripe.checkout', $commande->id) }}">
+                @csrf
+                <button 
+                    type="submit"
+                    class="bg-[#01B3BB] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#008D94] transition flex items-center justify-center gap-2"
+                >
+                    💳 Payer maintenant
+                </button>
+            </form>
+            @endif
+        </div>
+        
+        <!-- Important Note -->
+        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-center">
+            <p class="text-yellow-700 text-sm">
+                <svg class="w-5 h-5 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                 </svg>
-                Retour à l'accueil
-            </a>
-
-              @if($commande->mode_paiement === 'ligne' && $commande->payment_status === 'pending')
-<form method="POST" action="{{ route('stripe.checkout', $commande->id) }}">
-    @csrf
-    <button 
-        type="submit"
-        class="bg-[#01B3BB] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#008D94] transition flex items-center justify-center gap-2"
-    >
-        💳 Payer maintenant
-    </button>
-</form>
-@endif
+                <strong>Important:</strong> Conservez votre numéro de commande (#{{ str_pad($commande->id, 6, '0', STR_PAD_LEFT) }}) et téléchargez votre facture pour tout suivi ultérieur.
+            </p>
         </div>
     </div>
 </div>
+@endsection
+
+@section('styles')
+<style>
+    .transition {
+        transition: all 0.3s ease;
+    }
+</style>
 @endsection

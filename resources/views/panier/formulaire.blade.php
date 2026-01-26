@@ -157,38 +157,40 @@
                 
                 <!-- Liste des articles -->
                 <div class="space-y-3 mb-4">
-                    @foreach($panier as $item)
-    <div class="flex justify-between items-center border-b pb-2">
-        <div>
-            <p class="font-medium text-sm">{{ $item['titre'] }}</p>
-            <p class="text-gray-500 text-xs">
-                {{ $item['quantite'] }} × {{ number_format($item['prix'], 3) }} dt
-            </p>
-        </div>
-        <span class="font-bold">
-            {{ number_format($item['quantite'] * $item['prix'], 3) }} dt
-        </span>
-    </div>
-@endforeach
-
+                    @if(isset($items) && count($items) > 0)
+                        @foreach($items as $item)
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <p class="font-medium text-sm">{{ $item->titre }}</p>
+                                    <p class="text-gray-500 text-xs">
+                                        {{ $item->quantite }} × {{ number_format($item->prix_unitaire ?? $item->prix, 3) }} dt
+                                    </p>
+                                </div>
+                                <span class="font-bold">
+                                    {{ number_format(($item->quantite * ($item->prix_unitaire ?? $item->prix)), 3) }} dt
+                                </span>
+                            </div>
+                        @endforeach
+                    @else
+                        <p class="text-gray-500 text-center py-4">Votre panier est vide</p>
+                    @endif
                 </div>
                 
                 <!-- Total -->
                 <div class="border-t pt-4">
                     <div class="flex justify-between text-lg font-bold">
                         <span>Total :</span>
-                    @php $total = 0; @endphp
-
-@foreach($panier as $item)
-    @php
-        $total += $item['prix'] * $item['quantite'];
-    @endphp
-@endforeach
-
-<span class="text-[#01B3BB]">
-    {{ number_format($total, 3) }} dt
-</span>
-
+                        <span class="text-[#01B3BB]">
+                            @php
+                                $total = 0;
+                                if(isset($items) && count($items) > 0) {
+                                    foreach($items as $item) {
+                                        $total += $item->quantite * ($item->prix_unitaire ?? $item->prix);
+                                    }
+                                }
+                            @endphp
+                            {{ number_format($total, 3) }} dt
+                        </span>
                     </div>
                 </div>
                 

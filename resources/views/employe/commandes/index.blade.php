@@ -182,6 +182,18 @@
                                         </svg>
                                         Voir
                                     </a>
+                                    
+                                    <!-- Download Invoice Button - Only for validated orders -->
+                                    @if($commande->statut == 'validee')
+                                    <a href="{{ route('employe.commandes.downloadFacture', $commande->id) }}" 
+                                       class="px-3 py-1 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition flex items-center gap-1"
+                                       title="Télécharger la facture">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        Facture
+                                    </a>
+                                    @endif
 
                                     @if($commande->statut == 'en_attente')
                                     <form method="POST" action="{{ route('employe.commandes.valider', $commande->id) }}" 

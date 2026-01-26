@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <!-- Header -->
     <div class="bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] rounded-t-3xl p-8 mb-8">
         <div class="flex items-center justify-between">
             <div>
@@ -173,8 +172,8 @@
                                 {{ $commande->created_at->format('d/m/Y') }}
                             </td>
                             <td class="py-4 px-4">
-                                <div class="flex gap-2">
-                                    <a href="{{ route(auth()->user()->role.'.commandes.show', $commande->id) }}" 
+                                <div class="flex flex-wrap gap-2">
+                                    <a href="{{ route('admin.commandes.show', $commande) }}" 
                                        class="px-3 py-1 bg-[#01B3BB] text-white rounded-lg text-sm font-medium hover:bg-[#008D94] transition flex items-center gap-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -182,6 +181,18 @@
                                         </svg>
                                         Voir
                                     </a>
+
+                                    <!-- Download Invoice Button - Only for validated orders -->
+                                    @if($commande->statut == 'validee')
+                                    <a href="{{ route('admin.commandes.downloadFacture', $commande->id) }}" 
+                                       class="px-3 py-1 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition flex items-center gap-1"
+                                       title="Télécharger la facture">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        Facture
+                                    </a>
+                                    @endif
 
                                     @if($commande->statut == 'en_attente')
                                     <form method="POST" action="{{ route(auth()->user()->role.'.commandes.valider', $commande->id) }}" 

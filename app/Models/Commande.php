@@ -9,16 +9,18 @@ class Commande extends Model
     protected $fillable = [
         'user_id',
         'nom_client',
-        'email',         // Changez 'email_client' en 'email'
-        'telephone',     // Changez 'telephone_client' en 'telephone'
-        'adresse',       // Changez 'adresse_client' en 'adresse'
+        'email',
+        'telephone',
+        'adresse',
         'total',
         'statut',
-         'mode_paiement', // AJOUT: Nouveau champ pour le mode de paiement
-        'session_id'     // AJOUT: Pour les visiteurs non connectés
+        'mode_paiement',
+        'session_id',
+        'reference',
+        'stripe_session_id',
+        'payment_status'
     ];
 
-   // AJOUTEZ CETTE RELATION MANQUANTE :
     public function livres()
     {
         return $this->belongsToMany(Livre::class, 'commande_livre', 'commande_id', 'livre_id')

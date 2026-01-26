@@ -21,6 +21,12 @@
                     <div>
                         <h4 class="font-bold text-lg">{{ Auth::user()->name }}</h4>
                         <p class="text-gray-500 text-sm">Membre depuis {{ Auth::user()->created_at->format('M Y') }}</p>
+                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full 
+                            {{ Auth::user()->role === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                              (Auth::user()->role === 'employe' ? 'bg-blue-100 text-blue-800' : 
+                              (Auth::user()->role === 'client' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')) }}">
+                            {{ ucfirst(Auth::user()->role) }}
+                        </span>
                     </div>
                 </div>
 
@@ -32,29 +38,32 @@
                         </svg>
                         Informations personnelles
                     </a>
-                    <a href="#" class="flex items-center p-3 text-gray-600 hover:bg-gray-50 rounded-xl transition">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                        </svg>
-                        Sécurité
-                    </a>
-                    <a href="#" class="flex items-center p-3 text-gray-600 hover:bg-gray-50 rounded-xl transition">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
-                        </svg>
-                        Commandes
-                    </a>
                 </nav>
             </div>
 
-            <!-- Back to Dashboard -->
+            <!-- Back to Dashboard (Role-based) -->
             <div class="mt-6">
-                <a href="{{ route('dashboard') }}" class="flex items-center text-[#01B3BB] hover:text-[#FFC62A] transition">
+                @php
+                    $dashboardRoute = 'dashboard';
+                    $dashboardText = 'Retour au tableau de bord';
+                    
+                    if (Auth::user()->role === 'admin') {
+                        $dashboardRoute = 'admin.dashboard';
+                        $dashboardText = 'Retour au tableau de bord Admin';
+                    } elseif (Auth::user()->role === 'employe') {
+                        $dashboardRoute = 'employe.dashboard';
+                        $dashboardText = 'Retour au tableau de bord Employé';
+                    } elseif (Auth::user()->role === 'client') {
+                        $dashboardRoute = 'client.dashboard';
+                        $dashboardText = 'Retour au tableau de bord Client';
+                    }
+                @endphp
+                
+                <a href="{{ route($dashboardRoute) }}" class="flex items-center text-[#01B3BB] hover:text-[#FFC62A] transition">
                     <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Retour au tableau de bord
+                    {{ $dashboardText }}
                 </a>
             </div>
         </div>
@@ -140,7 +149,18 @@
                                 @endif
                             </div>
                             <div class="flex gap-4">
-                                <a href="{{ route('dashboard') }}" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition">
+                                @php
+                                    $cancelRoute = 'dashboard';
+                                    if (Auth::user()->role === 'admin') {
+                                        $cancelRoute = 'admin.dashboard';
+                                    } elseif (Auth::user()->role === 'employe') {
+                                        $cancelRoute = 'employe.dashboard';
+                                    } elseif (Auth::user()->role === 'client') {
+                                        $cancelRoute = 'client.dashboard';
+                                    }
+                                @endphp
+                                
+                                <a href="{{ route($cancelRoute) }}" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition">
                                     Annuler
                                 </a>
                                 <button type="submit" class="px-6 py-3 bg-[#FFC62A] text-[#1E1E1E] font-medium rounded-xl hover:bg-[#FFD666] transition">
@@ -152,7 +172,7 @@
                 </form>
             </div>
 
-            <!-- Delete Account Section (optional) -->
+            <!-- Delete Account Section -->
             <div class="mt-6 bg-red-50 border border-red-200 rounded-2xl p-6">
                 <h3 class="text-lg font-bold text-red-700 mb-2">Zone de danger</h3>
                 <p class="text-red-600 text-sm mb-4">

@@ -10,8 +10,13 @@ use Illuminate\Support\Facades\Storage;
 
 class BookController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request = null)
     {
+        // Handle case where request might be null
+        if (!$request) {
+            $request = request();
+        }
+        
         $query = Livre::with('categories');
         
         // search

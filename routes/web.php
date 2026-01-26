@@ -8,168 +8,228 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\Admin\BookController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Employee\BookController as EmployeeBookController;
 use App\Http\Controllers\Employee\CategoryController as EmployeeCategoryController;
+use App\Http\Controllers\CommandeController;
+use App\Http\Controllers\PanierController;
+use App\Http\Controllers\StripeController;
 
 Route::get('/', [Controller::class, 'welcome'])->name('welcome');
 Route::get('/book/{id}', [Controller::class, 'show'])->name('book.show');
 
-// Dashboard générique (accessible après authentification)
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Routes liées au profil
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Dashboards spécifiques selon les rôles
 Route::middleware(['auth'])->group(function () {
-    Route::get('/employe/dashboard', function () {
-        return view('dashboard.employe');
-    })->middleware(RoleMiddleware::class . ':employe')->name('employe.dashboard');
+    Route::get('/employe/dashboard', [EmployeeController::class, 'dashboard'])
+        ->middleware(RoleMiddleware::class . ':employe')
+        ->name('employe.dashboard');
 
-    Route::get('/client/dashboard', function () {
-        return view('dashboard.client');
-    })->middleware(RoleMiddleware::class . ':client')->name('client.dashboard');
+    Route::get('/client/dashboard', [ClientController::class, 'dashboard'])
+        ->middleware(RoleMiddleware::class . ':client')
+        ->name('client.dashboard');
 });
 
-// Employee routes
-Route::middleware(['auth', RoleMiddleware::class . ':employee'])->prefix('employee')->name('employee.')->group(function () {
-    // Books management
-    Route::prefix('books')->name('books.')->group(function () {
-        Route::get('/', [EmployeeBookController::class, 'index'])->name('index');
-        Route::get('/creer', [EmployeeBookController::class, 'create'])->name('create');
-        Route::post('/', [EmployeeBookController::class, 'store'])->name('store');
-        Route::get('/{livre}/modifier', [EmployeeBookController::class, 'edit'])->name('edit');
-        Route::put('/{livre}', [EmployeeBookController::class, 'update'])->name('update');
-        Route::delete('/{livre}', [EmployeeBookController::class, 'destroy'])->name('destroy');
-        Route::post('/{livre}/toggle-stock', [EmployeeBookController::class, 'toggleStock'])
-            ->name('toggle-stock');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications', function () {
+        $notifications = Auth::user()->notifications()->paginate(20);
+        return view('notifications.index', compact('notifications'));
+    })->name('notifications.index');
+    
+    Route::post('/notifications/{notification}/mark-as-read', function ($notificationId) {
+        $notification = Auth::user()->notifications()->findOrFail($notificationId);
+        $notification->markAsRead();
+        return response()->json(['success' => true]);
     });
     
-    // Categories management
-    Route::prefix('categories')->name('categories.')->group(function () {
-        Route::get('/', [EmployeeCategoryController::class, 'index'])->name('index');
-        Route::get('/creer', [EmployeeCategoryController::class, 'create'])->name('create');
-        Route::post('/', [EmployeeCategoryController::class, 'store'])->name('store');
-        Route::get('/{category}/modifier', [EmployeeCategoryController::class, 'edit'])->name('edit');
-        Route::put('/{category}', [EmployeeCategoryController::class, 'update'])->name('update');
-        Route::delete('/{category}', [EmployeeCategoryController::class, 'destroy'])->name('destroy');
-    });
+    Route::post('/notifications/mark-all-read', function () {
+        Auth::user()->unreadNotifications->markAsRead();
+        return back()->with('success', 'Toutes les notifications ont été marquées comme lues.');
+    })->name('notifications.mark-all-read');
 });
 
-// Admin routes
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [EmployeeController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.show');
     
-    // client toggle
-    Route::post('/clients/{user}/toggle', [ClientController::class, 'toggle'])
-        ->name('clients.toggle');
+    Route::prefix('clients')->name('clients.')->group(function () {
+        Route::get('/', [AdminController::class, 'clientsIndex'])->name('index');
+        Route::get('/{client}', [AdminController::class, 'clientsShow'])->name('show');
+        Route::get('/{client}/edit', [AdminController::class, 'clientsEdit'])->name('edit');
+        Route::put('/{client}', [AdminController::class, 'clientsUpdate'])->name('update');
+        Route::post('/{user}/toggle', [AdminController::class, 'clientsToggle'])->name('toggle');
+        Route::get('/create', [AdminController::class, 'clientsCreate'])->name('create');
+        Route::post('/', [AdminController::class, 'clientsStore'])->name('store');
+        Route::delete('/{client}', [AdminController::class, 'clientsDestroy'])->name('destroy');
+    });
     
-    // employees
     Route::prefix('employees')->name('employees.')->group(function () {
-        Route::get('/create', [EmployeeController::class, 'create'])
-            ->name('create');
-        Route::post('/', [EmployeeController::class, 'store'])
-            ->name('store');
-        Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])
-            ->name('edit');
-        Route::put('/{employee}', [EmployeeController::class, 'update'])
-            ->name('update');
-        Route::delete('/{employee}', [EmployeeController::class, 'destroy'])
-            ->name('destroy');
-        Route::post('/{employee}/toggle', [EmployeeController::class, 'toggleActive'])
-            ->name('toggle');
+        Route::get('/', [AdminController::class, 'employeesIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'employeesCreate'])->name('create');
+        Route::post('/', [AdminController::class, 'employeesStore'])->name('store');
+        Route::get('/{employee}/edit', [AdminController::class, 'employeesEdit'])->name('edit');
+        Route::put('/{employee}', [AdminController::class, 'employeesUpdate'])->name('update');
+        Route::delete('/{employee}', [AdminController::class, 'employeesDestroy'])->name('destroy');
+        Route::post('/{employee}/toggle', [AdminController::class, 'employeesToggle'])->name('toggle');
+        Route::get('/{employee}', [AdminController::class, 'employeesShow'])->name('show');
     });
 
-    // books
     Route::prefix('books')->name('books.')->group(function () {
         Route::get('/', [BookController::class, 'index'])->name('index');
         Route::get('/create', [BookController::class, 'create'])->name('create');
         Route::post('/', [BookController::class, 'store'])->name('store');
         Route::get('/{livre}/edit', [BookController::class, 'edit'])->name('edit');
+        Route::get('/{livre}', [BookController::class, 'show'])->name('show');
         Route::put('/{livre}', [BookController::class, 'update'])->name('update');
         Route::delete('/{livre}', [BookController::class, 'destroy'])->name('destroy');
         Route::post('/{livre}/toggle-stock', [BookController::class, 'toggleStock'])
             ->name('toggle-stock');
     });
     
-    // categories
     Route::prefix('categories')->name('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
         Route::get('/create', [CategoryController::class, 'create'])->name('create');
         Route::post('/', [CategoryController::class, 'store'])->name('store');
         Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
         Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
         Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
     });
+
+    Route::prefix('commandes')->name('commandes.')->group(function () {
+        Route::get('/', [CommandeController::class, 'indexAdmin'])->name('index');
+        Route::get('/{id}', [CommandeController::class, 'showAdmin'])->name('show');
+        Route::get('/{id}/edit', [CommandeController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [CommandeController::class, 'update'])->name('update');
+        Route::post('/{id}/valider', [CommandeController::class, 'valider'])->name('valider');
+        Route::post('/{id}/annuler', [CommandeController::class, 'annuler'])->name('annuler');
+        Route::get('/{id}/download-facture', [CommandeController::class, 'downloadFacture'])
+            ->name('downloadFacture');
+        Route::post('/{id}/renvoyer-facture', [CommandeController::class, 'renvoyerFacture'])
+            ->name('renvoyer.facture');
+        Route::get('/{id}/preview-facture', [CommandeController::class, 'previewFacture'])
+            ->name('preview.facture');
+    });
 });
-use App\Http\Controllers\CommandeController;
 
-// ================= COMMANDES =================
-Route::middleware('auth')->group(function () {
-
-    // Admin commandes
-    Route::prefix('admin')->name('admin.')->middleware(RoleMiddleware::class . ':admin')->group(function () {
-        Route::get('/commandes', [CommandeController::class, 'indexAdmin'])->name('commandes.index');
-        Route::get('/commandes/{id}', [CommandeController::class, 'showAdmin'])->name('commandes.show');
-        Route::post('/commandes/{id}/valider', [CommandeController::class, 'valider'])->name('commandes.valider');
-        Route::post('/commandes/{id}/annuler', [CommandeController::class, 'annuler'])->name('commandes.annuler');
-    });
-
-    // Employé commandes
-    Route::prefix('employe')->name('employe.')->middleware(RoleMiddleware::class . ':employe')->group(function () {
-        Route::get('/commandes', [CommandeController::class, 'indexEmploye'])->name('commandes.index');
-        Route::get('/commandes/{id}', [CommandeController::class, 'showEmploye'])->name('commandes.show');
-        Route::post('/commandes/{id}/valider', [CommandeController::class, 'valider'])->name('commandes.valider');
-        Route::post('/commandes/{id}/annuler', [CommandeController::class, 'annuler'])->name('commandes.annuler');
-    });
-
-
+Route::middleware(['auth', RoleMiddleware::class . ':employe'])->prefix('employee')->name('employee.')->group(function () {
+    Route::get('/dashboard', [EmployeeController::class, 'dashboard'])->name('dashboard');
     
-    // Panier client
-    Route::get('/panier', [CommandeController::class, 'panier'])->name('panier');
-    Route::post('/panier/ajouter/{livre_id}', [CommandeController::class, 'ajouterAuPanier'])->name('panier.ajouter');
-    Route::post('/commande/valider', [CommandeController::class, 'validerCommande'])->name('commande.valider');
+    Route::prefix('books')->name('books.')->group(function () {
+        Route::get('/', [EmployeeBookController::class, 'index'])->name('index');
+        Route::get('/creer', [EmployeeBookController::class, 'create'])->name('create');
+        Route::post('/', [EmployeeBookController::class, 'store'])->name('store');
+        Route::get('/{livre}/modifier', [EmployeeBookController::class, 'edit'])->name('edit');
+        Route::get('/{livre}', [EmployeeBookController::class, 'show'])->name('show');
+        Route::put('/{livre}', [EmployeeBookController::class, 'update'])->name('update');
+        Route::delete('/{livre}', [EmployeeBookController::class, 'destroy'])->name('destroy');
+        Route::post('/{livre}/toggle-stock', [EmployeeBookController::class, 'toggleStock'])
+            ->name('toggle-stock');
+    });
+    
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [EmployeeCategoryController::class, 'index'])->name('index');
+        Route::get('/creer', [EmployeeCategoryController::class, 'create'])->name('create');
+        Route::post('/', [EmployeeCategoryController::class, 'store'])->name('store');
+        Route::get('/{category}/modifier', [EmployeeCategoryController::class, 'edit'])->name('edit');
+        Route::get('/{category}', [EmployeeCategoryController::class, 'show'])->name('show');
+        Route::put('/{category}', [EmployeeCategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [EmployeeCategoryController::class, 'destroy'])->name('destroy');
+    });
 });
-// ================= PANIER (accessible sans auth) =================
+
+Route::middleware(['auth', RoleMiddleware::class . ':employe'])->prefix('employe')->name('employe.')->group(function () {
+    Route::get('/dashboard', [EmployeeController::class, 'dashboard'])->name('dashboard');
+    
+    Route::prefix('commandes')->name('commandes.')->group(function () {
+        Route::get('/', [CommandeController::class, 'indexAdmin'])->name('index');
+        Route::get('/{id}', [CommandeController::class, 'showAdmin'])->name('show');
+        Route::get('/{id}/edit', [CommandeController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [CommandeController::class, 'update'])->name('update');
+        Route::post('/{id}/valider', [CommandeController::class, 'valider'])->name('valider');
+        Route::post('/{id}/annuler', [CommandeController::class, 'annuler'])->name('annuler');
+        Route::get('/{id}/download-facture', [CommandeController::class, 'downloadFacture'])
+            ->name('downloadFacture');
+        Route::post('/{id}/renvoyer-facture', [CommandeController::class, 'renvoyerFacture'])
+            ->name('renvoyer.facture');
+        Route::get('/{id}/preview-facture', [CommandeController::class, 'previewFacture'])
+            ->name('preview.facture');
+    });
+    
+    Route::prefix('clients')->name('clients.')->group(function () {
+        Route::get('/', [EmployeeController::class, 'clientsIndex'])->name('index');
+        Route::get('/{client}', [EmployeeController::class, 'clientsShow'])->name('show');
+        Route::get('/{client}/edit', [EmployeeController::class, 'clientsEdit'])->name('edit');
+        Route::put('/{client}', [EmployeeController::class, 'clientsUpdate'])->name('update');
+        Route::post('/{client}/toggle-active', [EmployeeController::class, 'clientsToggleActive'])->name('toggle-active');
+        Route::get('/create', [EmployeeController::class, 'clientsCreate'])->name('create');
+        Route::post('/', [EmployeeController::class, 'clientsStore'])->name('store');
+        Route::delete('/{client}', [EmployeeController::class, 'clientsDestroy'])->name('destroy');
+    });
+});
+
+Route::middleware(['auth', RoleMiddleware::class . ':client'])->prefix('client')->name('client.')->group(function () {
+    Route::get('/dashboard', [ClientController::class, 'dashboard'])->name('dashboard');
+    
+    Route::get('/profile', [ClientController::class, 'profile'])->name('profile');
+    Route::put('/profile', [ClientController::class, 'updateProfile'])->name('profile.update');
+    
+    Route::prefix('commandes')->name('commandes.')->group(function () {
+        Route::get('/', [CommandeController::class, 'mesCommandes'])->name('index');
+        Route::get('/{id}', [CommandeController::class, 'showClient'])->name('show');
+        Route::post('/{id}/annuler', [CommandeController::class, 'annulerCommande'])->name('annuler');
+        Route::get('/{id}/download-facture', [CommandeController::class, 'downloadFacture'])
+            ->name('downloadFacture');
+    });
+});
+
 Route::prefix('panier')->name('panier.')->group(function () {
-    Route::get('/', [CommandeController::class, 'panier'])->name('index');
-    Route::post('/ajouter/{livre_id}', [CommandeController::class, 'ajouterAuPanier'])->name('ajouter');
-    Route::delete('/retirer/{livre_id}', [CommandeController::class, 'retirerDuPanier'])->name('retirer');
-    Route::put('/maj-quantite/{livre_id}', [CommandeController::class, 'majQuantite'])->name('maj-quantite');
-    Route::post('/vider', [CommandeController::class, 'viderPanier'])->name('vider');
+    Route::get('/', [PanierController::class, 'index'])->name('index');
+    Route::post('/ajouter/{livre_id}', [PanierController::class, 'ajouter'])->name('ajouter');
+    Route::delete('/retirer/{livre_id}', [PanierController::class, 'retirer'])->name('retirer');
+    Route::put('/maj-quantite/{livre_id}', [PanierController::class, 'majQuantite'])->name('maj-quantite');
+    Route::post('/vider', [PanierController::class, 'vider'])->name('vider');
 });
 
-// ================= COMMANDE =================
-Route::post('/commande/valider', [CommandeController::class, 'validerCommande'])->name('commande.valider');
-Route::get('/commande/confirmation', [CommandeController::class, 'confirmation'])->name('commande.confirmation');
-Route::get('/panier/formulaire', [CommandeController::class, 'formulaire'])
-    ->name('panier.formulaire');
-
-// ================= COMMANDES CLIENT =================
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('/panier/formulaire', [PanierController::class, 'formulaireCommande'])->name('panier.formulaire');
+    Route::post('/panier/valider-commande', [PanierController::class, 'validerCommande'])->name('panier.valider-commande');
+    Route::get('/commande/confirmation/{id}', [PanierController::class, 'confirmation'])->name('commande.confirmation');
+    
     Route::get('/mes-commandes', [CommandeController::class, 'mesCommandes'])->name('commandes.mes-commandes');
     Route::get('/mes-commandes/{id}', [CommandeController::class, 'showClient'])->name('commandes.show');
+    
+    Route::get('/mes-commandes/{id}/facture', [CommandeController::class, 'downloadFacture'])
+        ->name('commandes.facture');
+    Route::post('/mes-commandes/{id}/renvoyer-facture', [CommandeController::class, 'renvoyerFacture'])
+        ->name('commandes.renvoyer.facture');
+    
+    Route::post('/stripe/checkout/{commande}', [StripeController::class, 'checkout'])->name('stripe.checkout');
+    Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
+    Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+    
+    Route::prefix('favoris')->name('client.wishlist.')->group(function () {
+        Route::get('/', [ClientController::class, 'wishlist'])->name('index');
+        Route::post('/ajouter/{livreId}', [ClientController::class, 'addToWishlist'])->name('add');
+        Route::post('/retirer/{livreId}', [ClientController::class, 'removeFromWishlist'])->name('remove');
+        Route::post('/vider', [ClientController::class, 'clearWishlist'])->name('clear');
+    });
+    
+    Route::get('/mes-favoris', [ClientController::class, 'wishlist'])->name('client.wishlist');
 });
-Route::post('/panier/valider-commande', [CommandeController::class, 'creerCommande'])
-    ->name('panier.valider-commande');
-Route::post('/panier/vider', [CommandeController::class, 'viderPanier'])->name('panier.vider');
 
-use App\Http\Controllers\StripeController;
-
-Route::post('/stripe/checkout/{commande}', [StripeController::class, 'checkout'])
-    ->name('stripe.checkout');
-
-Route::get('/stripe/success', [StripeController::class, 'success'])
-    ->name('stripe.success');
-
-Route::get('/stripe/cancel', [StripeController::class, 'cancel'])
-    ->name('stripe.cancel');
+Route::prefix('books')->name('books.')->group(function () {
+    Route::get('/', [Controller::class, 'index'])->name('index');
+    Route::get('/category/{category}', [Controller::class, 'byCategory'])->name('category');
+    Route::get('/search', [Controller::class, 'search'])->name('search');
+});
 
 require __DIR__.'/auth.php';

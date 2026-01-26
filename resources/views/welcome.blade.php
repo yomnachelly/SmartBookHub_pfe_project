@@ -1,25 +1,140 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="relative bg-gradient-to-l from-[#01B3BB] to-[#4ECFD7] overflow-hidden">
-        <div class="container mx-auto px-4 py-12">
-            <div class="flex items-center justify-between">
-                <!-- books image -->
-                <div class="w-1/3">
-                    <img src="/images/books-collection.png" alt="مجموعة الكتب" class="w-full">
+    <section class="relative overflow-hidden bg-[#01B3BB]">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#01B3BB] via-[#2ac8d0] to-[#4ECFD7]">
+            <div class="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_30%_40%,_white_0px,_transparent_1px)] bg-[length:40px_40px]"></div>
+            
+            <div class="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-r from-[#FFC62A]/10 to-[#FFD666]/5 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-gradient-to-l from-white/5 to-transparent rounded-full blur-3xl"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-[#01B3BB]/20 to-transparent rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+        
+        <div class="container relative mx-auto px-4 py-20 md:py-24">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-12">
+                <div class="w-full lg:w-2/5 order-2 lg:order-1">
+                    <div class="relative flex justify-center lg:justify-start">
+                        <div class="relative group cursor-pointer w-4/5 lg:w-3/4">
+                            <div class="relative rounded-2xl overflow-hidden border border-white/30 bg-white/10 backdrop-blur-xl shadow-2xl">
+                                <div class="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent"></div>
+                                
+                                <img src="/images/books-collection.png" alt="مجموعة الكتب" 
+                                    class="w-full transform transition-all duration-700 group-hover:scale-110">
+                                
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#01B3BB]/30 via-transparent to-transparent 
+                                            opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            </div>
+                            
+                            <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 
+                                        bg-white/95 backdrop-blur-xl text-[#01B3BB] text-sm font-semibold 
+                                        px-5 py-2.5 rounded-full border border-white/40 shadow-lg
+                                        transition-all duration-300 group-hover:scale-105">
+                                +50 إصدار
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="w-1/3 text-center text-white">
-                    <h1 class="text-4xl font-bold mb-4" style="font-family: 'Arial', sans-serif;">إصدارات الأستاذ</h1>
-                    <h2 class="text-3xl font-bold mb-4" style="font-family: 'Arial', sans-serif;">طارق البريكي</h2>
-                    <p class="text-xl" style="font-family: 'Arial', sans-serif;">رياضيات - إيقاظ </p>
+                <div class="w-full lg:w-3/5 text-center order-1 lg:order-2 px-4 lg:px-0">
+                    <div class="inline-flex items-center gap-3 mb-8 px-4 py-2.5 
+                            bg-white/15 backdrop-blur-sm rounded-full border border-white/25">
+                        <div class="w-2 h-2 rounded-full bg-[#FFC62A] animate-pulse"></div>
+                        <span class="text-white/95 text-sm font-medium tracking-wider">
+                            مكتبة تعليمية متخصصة
+                        </span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+                        <span class="block mb-2">إصدارات</span>
+                        <span class="font-bold bg-gradient-to-r from-white via-white/95 to-white/90 
+                                    bg-clip-text text-transparent drop-shadow-lg">
+                            طارق البريكي
+                        </span>
+                    </h1>
+                    
+                    <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide 
+                            leading-relaxed max-w-2xl mx-auto">
+                        <span class="font-medium">رياضيات</span> • 
+                        <span class="font-medium">إيقاظ</span> • 
+                        <span class="font-medium">مناهج تعليمية</span>
+                    </p>
+                    
+                    <div class="relative mb-10">
+                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
+                                    bg-white/10 backdrop-blur-sm px-6 py-1.5 rounded-full">
+                            <span class="text-white/60 text-xs font-medium tracking-wider">
+                                المؤلف المتميز
+                            </span>
+                        </div>
+                        <div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                    </div>
+                    
+                    <div class="flex flex-wrap justify-center gap-3 mb-12 max-w-2xl mx-auto">
+                        <span class="px-5 py-2.5 bg-white/12 backdrop-blur-sm rounded-full 
+                                    text-white text-sm font-medium border border-white/25 
+                                    hover:bg-white/20 hover:border-white/40 
+                                    transition-all duration-300 hover:scale-105">
+                            كتب منهجية
+                        </span>
+                        <span class="px-5 py-2.5 bg-white/12 backdrop-blur-sm rounded-full 
+                                    text-white text-sm font-medium border border-white/25 
+                                    hover:bg-white/20 hover:border-white/40 
+                                    transition-all duration-300 hover:scale-105">
+                            تمارين محلولة
+                        </span>
+                        <span class="px-5 py-2.5 bg-white/12 backdrop-blur-sm rounded-full 
+                                    text-white text-sm font-medium border border-white/25 
+                                    hover:bg-white/20 hover:border-white/40 
+                                    transition-all duration-300 hover:scale-105">
+                            شرح مبسط
+                        </span>
+                    </div>
                 </div>
 
-                <!-- author image -->
-                <div class="w-1/3 relative">
-                    <img src="/images/author.png" alt="طارق البريكي" class="w-full">
+                <!-- Author image -->
+                <div class="w-full lg:w-2/5 order-3">
+                    <div class="relative flex justify-center lg:justify-end">
+                        <div class="relative group w-4/5 lg:w-3/4">
+                            <div class="relative rounded-2xl overflow-hidden border border-white/30 
+                                        bg-white/10 backdrop-blur-xl shadow-2xl">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-white/15 to-transparent"></div>
+                                
+                                <img src="/images/author.png" alt="طارق البريكي" 
+                                    class="w-full transform transition-all duration-700 group-hover:scale-110">
+                                
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#01B3BB]/30 via-transparent to-transparent 
+                                            opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            </div>
+                            
+                            <div class="absolute -bottom-4 right-6 
+                                        bg-white/95 backdrop-blur-xl text-[#01B3BB] text-sm font-semibold 
+                                        px-4 py-2 rounded-full border border-white/40 shadow-lg
+                                        transition-all duration-300 group-hover:scale-105">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/>
+                                    </svg>
+                                    المؤلف
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 right-0 h-48 
+                    bg-gradient-to-t from-white/10 via-white/5 to-transparent pointer-events-none"></div>
+        
+        <div class="absolute top-1/4 left-10">
+            <div class="w-1 h-1 rounded-full bg-white/30 animate-pulse"></div>
+            <div class="w-2 h-2 rounded-full bg-white/20 ml-4 mt-2 animate-pulse" style="animation-delay: 0.3s"></div>
+        </div>
+        <div class="absolute bottom-1/3 right-12">
+            <div class="w-2 h-2 rounded-full bg-white/25 animate-pulse" style="animation-delay: 0.7s"></div>
+            <div class="w-1 h-1 rounded-full bg-white/15 -ml-3 mt-3 animate-pulse" style="animation-delay: 1s"></div>
         </div>
     </section>
 
@@ -53,7 +168,6 @@
                                     </div>
                                 @endif
                                 <div class="hover-actions absolute top-4 left-4 flex gap-2 opacity-0 invisible transition-all duration-300">
-                                    <!-- CORRECTION: Bouton Ajouter au panier -->
                                     @if($livre->stock > 0)
                                     <form method="POST" action="{{ route('panier.ajouter', $livre->id_livre) }}" class="z-20 relative">
                                         @csrf
@@ -70,12 +184,22 @@
                                     </button>
                                     @endif
                                     
-                                    <!-- Bouton favoris (optionnel) -->
-                                    <button class="bg-white p-2 rounded-lg hover:bg-gray-100 transition z-20 relative favorite-btn" data-livre-id="{{ $livre->id_livre }}">
-                                        <svg class="w-6 h-6 text-[#FFC62A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                        </svg>
-                                    </button>
+                                    <form method="POST" action="{{ route('client.wishlist.add', $livre->id_livre) }}" class="wishlist-form z-20 relative">
+                                        @csrf
+                                        <button type="submit" class="bg-white p-2 rounded-lg hover:bg-gray-100 transition">
+                                            @if(auth()->check() && isset($livre->is_in_wishlist) && $livre->is_in_wishlist)
+                                                <!-- filled heart -->
+                                                <svg class="w-6 h-6 text-[#FFC62A]" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                                </svg>
+                                            @else
+                                                <!-- empty heart -->
+                                                <svg class="w-6 h-6 text-[#FFC62A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                                </svg>
+                                            @endif
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                             <div class="p-4">
