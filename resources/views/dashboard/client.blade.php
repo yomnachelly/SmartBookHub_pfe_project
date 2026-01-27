@@ -156,7 +156,6 @@
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold text-sm">Date</th>
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold text-sm">Statut</th>
                                     <th class="text-left py-3 px-4 text-gray-600 font-semibold text-sm">Total</th>
-                                    <th class="text-left py-3 px-4 text-gray-600 font-semibold text-sm">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -190,16 +189,6 @@
                                     </td>
                                     <td class="py-3 px-4">
                                         <span class="font-medium text-gray-900">{{ number_format($commande->total, 3, '.', ' ') }} dt</span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <a href="#" 
-                                           class="p-1.5 hover:bg-blue-50 rounded-lg transition text-blue-600 hover:text-blue-700"
-                                           title="Voir les détails">
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                                            </svg>
-                                        </a>
                                     </td>
                                 </tr>
                                 @endforeach

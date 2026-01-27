@@ -7,6 +7,10 @@ use App\Models\Commande;
 use App\Models\Livre;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceMail;
+use Illuminate\Support\Facades\Log;
 
 class PanierController extends Controller
 {
@@ -239,13 +243,16 @@ class PanierController extends Controller
             }
         }
         
+        $reference = 'CMD-' . strtoupper(Str::random(8));
+        
         $panier->update([
             'nom_client' => $request->nom_client,
             'email' => $request->email,
             'telephone' => $request->telephone,
             'adresse' => $request->adresse,
             'mode_paiement' => $request->mode_paiement,
-            'statut' => 'en_attente'
+            'statut' => 'en_attente',
+            'reference' => $reference
         ]);
         
         if (Auth::check() && !$panier->user_id) {
@@ -258,6 +265,23 @@ class PanierController extends Controller
                 ->decrement('stock', $livre->quantite);
         }
         
+        try {
+            $commande = Commande::with('livres')->find($panier->id);
+            
+            Mail::to($commande->email)->send(new InvoiceMail($commande));
+            
+            Log::info('Invoice email sent for order #' . $commande->id . ' to ' . $commande->email);
+            
+            session()->flash('invoice_sent', true);
+            session()->flash('customer_email', $commande->email);
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to send invoice email: ' . $e->getMessage());
+            
+            session()->flash('invoice_sent', false);
+            session()->flash('email_error', $e->getMessage());
+        }
+        
         if (Auth::check()) {
             Commande::create([
                 'user_id' => Auth::id(),
@@ -267,15 +291,32 @@ class PanierController extends Controller
             ]);
         }
         
+        session()->put('last_order_id', $panier->id);
+        session()->put('last_order_session', session()->getId());
+        
         return redirect()->route('commande.confirmation', ['id' => $panier->id])
-                        ->with('success', 'Commande passée avec succès!');
+                        ->with('success', 'Commande passée avec succès! Un email de confirmation vous a été envoyé.');
     }
     
     public function confirmation($id)
     {
         $commande = Commande::findOrFail($id);
         
-        if (Auth::check() && $commande->user_id && $commande->user_id !== Auth::id()) {
+        $canAccess = false;
+        
+        if (Auth::check() && $commande->user_id && $commande->user_id === Auth::id()) {
+            $canAccess = true;
+        }
+        
+        if (!$canAccess && session('last_order_id') == $id && session('last_order_session') == session()->getId()) {
+            $canAccess = true;
+        }
+        
+        if (!$canAccess && !$commande->user_id && $commande->session_id === session()->getId()) {
+            $canAccess = true;
+        }
+        
+        if (!$canAccess) {
             abort(403, 'Unauthorized access to this order');
         }
         
@@ -294,8 +335,15 @@ class PanierController extends Controller
         
         $commande->livres = $livres;
         
+        $invoiceSent = session('invoice_sent', false);
+        $customerEmail = session('customer_email', $commande->email);
+        $emailError = session('email_error');
+        
         return view('panier.confirmation', [
-            'commande' => $commande
+            'commande' => $commande,
+            'invoiceSent' => $invoiceSent,
+            'customerEmail' => $customerEmail,
+            'emailError' => $emailError
         ]);
     }
 }

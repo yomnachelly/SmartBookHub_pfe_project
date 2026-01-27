@@ -20,16 +20,13 @@
             </div>
         </div>
 
-        <!-- form -->
         <div class="bg-white rounded-2xl shadow-lg p-8">
             <form action="{{ route('admin.books.update', $livre) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- left col -->
                     <div class="space-y-6">
-                        <!-- title -->
                         <div>
                             <label for="titre" class="block text-sm font-medium text-gray-700 mb-2">
                                 Titre du livre *
@@ -45,7 +42,6 @@
                             @enderror
                         </div>
 
-                        <!-- author -->
                         <div>
                             <label for="auteur" class="block text-sm font-medium text-gray-700 mb-2">
                                 Auteur *
@@ -61,7 +57,6 @@
                             @enderror
                         </div>
 
-                        <!-- publisher -->
                         <div>
                             <label for="editeur" class="block text-sm font-medium text-gray-700 mb-2">
                                 Éditeur
@@ -73,7 +68,6 @@
                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFC62A] focus:border-transparent">
                         </div>
 
-                        <!-- publication year -->
                         <div>
                             <label for="annee_publication" class="block text-sm font-medium text-gray-700 mb-2">
                                 Année de publication
@@ -85,7 +79,6 @@
                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFC62A] focus:border-transparent">
                         </div>
 
-                        <!-- price -->
                         <div>
                             <label for="prix" class="block text-sm font-medium text-gray-700 mb-2">
                                 Prix (dt) *
@@ -104,9 +97,7 @@
                         </div>
                     </div>
 
-                    <!-- right col -->
                     <div class="space-y-6">
-                        <!-- stock -->
                         <div>
                             <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">
                                 Quantité en stock *
@@ -123,7 +114,6 @@
                             @enderror
                         </div>
 
-                        <!-- categories -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Catégories
@@ -145,7 +135,6 @@
                             @enderror
                         </div>
 
-                        <!-- img -->
                         <div>
                             <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
                                 Image du livre
@@ -166,7 +155,18 @@
                             <p class="mt-1 text-sm text-gray-500">Laisser vide pour conserver l'image actuelle</p>
                         </div>
 
-                        <!-- desc -->
+                        <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" 
+                                       name="visible" 
+                                       value="1"
+                                       class="rounded border-gray-300 text-[#FFC62A] focus:ring-[#FFC62A] mr-3"
+                                       {{ old('visible', $livre->visible) ? 'checked' : '' }}>
+                                <span class="text-gray-700 font-medium">Visible aux clients</span>
+                            </label>
+                            <p class="mt-1 text-sm text-gray-500">Si désactivé, le livre ne sera pas visible par les clients</p>
+                        </div>
+
                         <div class="md:col-span-2">
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
                                 Description
@@ -179,7 +179,6 @@
                     </div>
                 </div>
 
-                <!-- stats -->
                 <div class="mt-8 p-6 bg-gray-50 rounded-xl">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Informations du livre</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -204,7 +203,6 @@
                     </div>
                 </div>
 
-                <!-- btns -->
                 <div class="flex gap-4 pt-8 mt-8 border-t border-gray-200">
                     <a href="{{ route('admin.books.index') }}" 
                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium text-center hover:bg-gray-50 transition">

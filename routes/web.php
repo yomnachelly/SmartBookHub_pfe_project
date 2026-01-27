@@ -92,6 +92,8 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->prefix('admin')->
         Route::delete('/{livre}', [BookController::class, 'destroy'])->name('destroy');
         Route::post('/{livre}/toggle-stock', [BookController::class, 'toggleStock'])
             ->name('toggle-stock');
+        Route::post('/{livre}/toggle-visibility', [BookController::class, 'toggleVisibility'])
+            ->name('toggle-visibility');
     });
     
     Route::prefix('categories')->name('categories.')->group(function () {
@@ -191,31 +193,43 @@ Route::middleware(['auth', RoleMiddleware::class . ':client'])->prefix('client')
     });
 });
 
+// CART ROUTES
 Route::prefix('panier')->name('panier.')->group(function () {
     Route::get('/', [PanierController::class, 'index'])->name('index');
     Route::post('/ajouter/{livre_id}', [PanierController::class, 'ajouter'])->name('ajouter');
     Route::delete('/retirer/{livre_id}', [PanierController::class, 'retirer'])->name('retirer');
     Route::put('/maj-quantite/{livre_id}', [PanierController::class, 'majQuantite'])->name('maj-quantite');
     Route::post('/vider', [PanierController::class, 'vider'])->name('vider');
+    
+    // ORDER FORM AND CHECKOUT
+    Route::get('/formulaire', [PanierController::class, 'formulaireCommande'])->name('formulaire');
+    Route::post('/valider-commande', [PanierController::class, 'validerCommande'])->name('valider-commande');
 });
 
+// ORDER CONFIRMATION
+Route::get('/commande/confirmation/{id}', [PanierController::class, 'confirmation'])->name('commande.confirmation');
+
+// PUBLIC INVOICE DOWNLOAD
+Route::get('/commande/{id}/facture', [CommandeController::class, 'downloadFacturePublic'])->name('commande.facture');
+
+// STRIPE PAYMENT ROUTES
+Route::post('/stripe/checkout/{commande}', [StripeController::class, 'checkout'])->name('stripe.checkout');
+Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
+Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+
+// AUTHENTICATED USER ROUTES
 Route::middleware(['auth'])->group(function () {
-    Route::get('/panier/formulaire', [PanierController::class, 'formulaireCommande'])->name('panier.formulaire');
-    Route::post('/panier/valider-commande', [PanierController::class, 'validerCommande'])->name('panier.valider-commande');
-    Route::get('/commande/confirmation/{id}', [PanierController::class, 'confirmation'])->name('commande.confirmation');
-    
+    // My orders section
     Route::get('/mes-commandes', [CommandeController::class, 'mesCommandes'])->name('commandes.mes-commandes');
     Route::get('/mes-commandes/{id}', [CommandeController::class, 'showClient'])->name('commandes.show');
     
+    // Invoice download
     Route::get('/mes-commandes/{id}/facture', [CommandeController::class, 'downloadFacture'])
         ->name('commandes.facture');
     Route::post('/mes-commandes/{id}/renvoyer-facture', [CommandeController::class, 'renvoyerFacture'])
         ->name('commandes.renvoyer.facture');
     
-    Route::post('/stripe/checkout/{commande}', [StripeController::class, 'checkout'])->name('stripe.checkout');
-    Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
-    Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
-    
+    // Wishlist routes
     Route::prefix('favoris')->name('client.wishlist.')->group(function () {
         Route::get('/', [ClientController::class, 'wishlist'])->name('index');
         Route::post('/ajouter/{livreId}', [ClientController::class, 'addToWishlist'])->name('add');
@@ -231,5 +245,13 @@ Route::prefix('books')->name('books.')->group(function () {
     Route::get('/category/{category}', [Controller::class, 'byCategory'])->name('category');
     Route::get('/search', [Controller::class, 'search'])->name('search');
 });
+
+Route::get('/a-propos', function () {
+    return view('apropos');
+})->name('apropos');
+
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
 
 require __DIR__.'/auth.php';

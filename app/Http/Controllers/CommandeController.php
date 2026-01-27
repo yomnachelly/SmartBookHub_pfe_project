@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InvoiceMail;
 use App\Models\Commande;
 use App\Models\Livre;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use App\Mail\OrderConfirmationMail;
 
 class CommandeController extends Controller
 {
@@ -323,6 +325,13 @@ class CommandeController extends Controller
             $livre->decrement('stock', $quantitePanier);
         }
         
+        try {
+            Mail::to($commande->email)->send(new InvoiceMail($commande));
+            \Log::info('Invoice sent for new order #' . $commande->id . ' to ' . $commande->email);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send invoice for new order: ' . $e->getMessage());
+        }
+        
         if (Auth::check()) {
             $panier->delete();
             
@@ -347,7 +356,7 @@ class CommandeController extends Controller
         }
         
         return redirect()->route('commande.confirmation')->with([
-            'success' => 'Commande passée avec succès!',
+            'success' => 'Commande passée avec succès! Un email de confirmation vous a été envoyé.',
             'commande_id' => $commande->id
         ]);
     }
@@ -416,7 +425,6 @@ class CommandeController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(20);
             
-            // Determine which view to use based on user role
             $role = Auth::user()->role;
             
             if ($role === 'employe') {
@@ -435,14 +443,12 @@ class CommandeController extends Controller
         try {
             $commande = Commande::findOrFail($id);
             
-            // Determine which view to use based on user role
             if (!Auth::check()) {
                 return redirect()->route('login');
             }
             
             $role = Auth::user()->role;
             
-            // Load relationships to avoid N+1 queries
             $commande->load('livres');
             
             if ($role === 'employe') {
@@ -501,16 +507,30 @@ class CommandeController extends Controller
     
     public function valider($id)
     {
-        $commande = Commande::findOrFail($id);
-        
-        $commande->update(['statut' => 'validee']);
-        
-        $user = User::find($commande->user_id);
-        if ($user) {
-            $user->notify(new \App\Notifications\CommandeValidee($commande));
+        try {
+            $commande = Commande::findOrFail($id);
+            
+            if ($commande->statut === 'validee') {
+                return redirect()->back()->with('info', 'Cette commande est déjà validée.');
+            }
+            
+            $ancienStatut = $commande->statut;
+            $commande->statut = 'validee';
+            $commande->save();
+            
+            try {
+                Mail::to($commande->email)->send(new InvoiceMail($commande));
+                \Log::info('Invoice resent for validated order #' . $commande->id . ' to ' . $commande->email);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send invoice for validated order: ' . $e->getMessage());
+            }
+            
+            return redirect()->back()->with('success', 'Commande validée et facture envoyée au client');
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to validate order: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Erreur: ' . $e->getMessage());
         }
-        
-        return redirect()->back()->with('success', 'Commande validée avec succès!');
     }
     
     public function annuler($id)
@@ -530,7 +550,6 @@ class CommandeController extends Controller
     {
         $commande = Commande::findOrFail($id);
         
-        // Check if order is validated
         if ($commande->statut !== 'validee') {
             return redirect()->back()->with('error', 'La facture n\'est disponible que pour les commandes validées.');
         }
@@ -547,23 +566,51 @@ class CommandeController extends Controller
         return $pdf->download('facture-' . $commande->reference . '.pdf');
     }
     
+    public function downloadFacturePublic($id)
+    {
+        $commande = Commande::findOrFail($id);
+        
+        $canAccess = false;
+        
+        if (Auth::check() && $commande->user_id && $commande->user_id === Auth::id()) {
+            $canAccess = true;
+        }
+        
+        if (Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'employe')) {
+            $canAccess = true;
+        }
+        
+        if (!$canAccess && session('last_order_id') == $id && session('last_order_session') == session()->getId()) {
+            $canAccess = true;
+        }
+        
+        if (!$canAccess && !$commande->user_id && $commande->session_id === session()->getId()) {
+            $canAccess = true;
+        }
+        
+        if (!$canAccess) {
+            abort(403, 'Unauthorized access to this invoice');
+        }
+        
+        $commande->load('livres');
+        
+        $pdf = Pdf::loadView('invoices.invoice', compact('commande'));
+        
+        $fileName = 'facture-' . ($commande->reference ?? 'CMD-' . str_pad($commande->id, 6, '0', STR_PAD_LEFT)) . '.pdf';
+        
+        return $pdf->download($fileName);
+    }
+    
     public function renvoyerFacture($id)
     {
         $commande = Commande::findOrFail($id);
         
-        // Check if order is validated
         if ($commande->statut !== 'validee') {
             return redirect()->back()->with('error', 'La facture n\'est disponible que pour les commandes validées.');
         }
         
         try {
-            $pdf = Pdf::loadView('invoices.invoice', compact('commande'));
-            
-            Mail::send('emails.facture', ['commande' => $commande], function ($message) use ($commande, $pdf) {
-                $message->to($commande->email)
-                    ->subject('Votre facture - Commande ' . $commande->reference)
-                    ->attachData($pdf->output(), 'facture-' . $commande->reference . '.pdf');
-            });
+            Mail::to($commande->email)->send(new InvoiceMail($commande));
             
             return redirect()->back()->with('success', 'Facture envoyée par email!');
         } catch (\Exception $e) {
@@ -576,7 +623,6 @@ class CommandeController extends Controller
     {
         $commande = Commande::findOrFail($id);
         
-        // Check if order is validated
         if ($commande->statut !== 'validee') {
             return redirect()->back()->with('error', 'La facture n\'est disponible que pour les commandes validées.');
         }

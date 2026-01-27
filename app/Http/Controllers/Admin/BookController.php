@@ -12,7 +12,6 @@ class BookController extends Controller
 {
     public function index(Request $request = null)
     {
-        // Handle case where request might be null
         if (!$request) {
             $request = request();
         }
@@ -29,7 +28,6 @@ class BookController extends Controller
             });
         }
         
-        // filtering by category
         if ($request->filled('categorie')) {
             $categorieId = $request->input('categorie');
             $query->whereHas('categories', function($q) use ($categorieId) {
@@ -37,13 +35,21 @@ class BookController extends Controller
             });
         }
         
-        // filtering by stock status
         if ($request->filled('stock')) {
             $stockFilter = $request->input('stock');
             if ($stockFilter === 'in_stock') {
                 $query->where('stock', '>', 0);
             } elseif ($stockFilter === 'out_of_stock') {
                 $query->where('stock', 0);
+            }
+        }
+        
+        if ($request->filled('visibility')) {
+            $visibilityFilter = $request->input('visibility');
+            if ($visibilityFilter === 'visible') {
+                $query->where('visible', true);
+            } elseif ($visibilityFilter === 'hidden') {
+                $query->where('visible', false);
             }
         }
         
@@ -71,12 +77,15 @@ class BookController extends Controller
             'description' => 'nullable|string',
             'categorie_ids' => 'array',
             'categorie_ids.*' => 'exists:categories,id_categ',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'visible' => 'nullable|in:0,1'
         ]);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('livres', 'public');
         }
+
+        $validated['visible'] = $request->input('visible', '0') === '1';
 
         $livre = Livre::create($validated);
 
@@ -107,7 +116,8 @@ class BookController extends Controller
             'description' => 'nullable|string',
             'categorie_ids' => 'array',
             'categorie_ids.*' => 'exists:categories,id_categ',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'visible' => 'nullable|in:0,1'
         ]);
 
         if ($request->hasFile('image')) {
@@ -116,6 +126,8 @@ class BookController extends Controller
             }
             $validated['image'] = $request->file('image')->store('livres', 'public');
         }
+
+        $validated['visible'] = $request->input('visible', '0') === '1';
 
         $livre->update($validated);
 
@@ -149,5 +161,14 @@ class BookController extends Controller
         ]);
 
         return back()->with('success', 'Stock mis à jour avec succès!');
+    }
+
+    public function toggleVisibility(Livre $livre)
+    {
+        $livre->update([
+            'visible' => !$livre->visible
+        ]);
+
+        return back()->with('success', 'Visibilité mise à jour avec succès!');
     }
 }

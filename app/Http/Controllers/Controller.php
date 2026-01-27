@@ -19,6 +19,8 @@ class Controller extends \Illuminate\Routing\Controller
         
         $query = Livre::query();
         
+        $query->where('visible', true);
+        
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('titre', 'like', '%' . $search . '%')
@@ -64,6 +66,7 @@ class Controller extends \Illuminate\Routing\Controller
         $plagesPrix = [];
         foreach ($priceRanges as $range) {
             $count = Livre::whereBetween('prix', [$range['min'], $range['max']])
+                          ->where('visible', true)
                           ->where('stock', '>', 0)
                           ->count();
             
@@ -82,8 +85,8 @@ class Controller extends \Illuminate\Routing\Controller
     
     private function calculatePriceRanges()
     {
-        $minPrice = Livre::where('stock', '>', 0)->min('prix') ?? 0;
-        $maxPrice = Livre::where('stock', '>', 0)->max('prix') ?? 100;
+        $minPrice = Livre::where('visible', true)->where('stock', '>', 0)->min('prix') ?? 0;
+        $maxPrice = Livre::where('visible', true)->where('stock', '>', 0)->max('prix') ?? 100;
         $ranges = [];
         $step = max(1, ceil(($maxPrice - $minPrice) / 4));
         
@@ -98,6 +101,7 @@ class Controller extends \Illuminate\Routing\Controller
         
         foreach ($rangeDefinitions as $range) {
             $count = Livre::whereBetween('prix', [$range['min'], $range['max']])
+                          ->where('visible', true)
                           ->where('stock', '>', 0)
                           ->count();
             
@@ -116,7 +120,9 @@ class Controller extends \Illuminate\Routing\Controller
 
     public function show($id)
     {
-        $livre = Livre::with('categories')->findOrFail($id);
+        $livre = Livre::with('categories')
+                      ->where('visible', true)
+                      ->findOrFail($id);
         
         if (Auth::check()) {
             $isInWishlist = Wishlist::where('user_id', Auth::id())
@@ -130,6 +136,7 @@ class Controller extends \Illuminate\Routing\Controller
             $q->whereIn('categories.id_categ', $livre->categories->pluck('id_categ'));
         })
         ->where('id_livre', '!=', $id)
+        ->where('visible', true)
         ->where('stock', '>', 0)
         ->limit(4)
         ->get();
@@ -149,7 +156,8 @@ class Controller extends \Illuminate\Routing\Controller
 
     public function index()
     {
-        $livres = Livre::where('stock', '>', 0)
+        $livres = Livre::where('visible', true)
+            ->where('stock', '>', 0)
             ->orderBy('created_at', 'desc')
             ->paginate(12);
             
@@ -163,6 +171,7 @@ class Controller extends \Illuminate\Routing\Controller
         $categorie = Categorie::where('nom_categ', $category)->firstOrFail();
         
         $livres = $categorie->livres()
+            ->where('visible', true)
             ->where('stock', '>', 0)
             ->paginate(12);
             
@@ -175,7 +184,8 @@ class Controller extends \Illuminate\Routing\Controller
     {
         $query = $request->input('q');
         
-        $livres = Livre::where('stock', '>', 0)
+        $livres = Livre::where('visible', true)
+            ->where('stock', '>', 0)
             ->where(function($q) use ($query) {
                 $q->where('titre', 'like', "%{$query}%")
                   ->orWhere('auteur', 'like', "%{$query}%")

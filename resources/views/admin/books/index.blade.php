@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <!-- Header -->
     <div class="bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] rounded-t-3xl p-8 mb-8">
         <div class="flex items-center justify-between">
             <div>
@@ -39,7 +38,6 @@
         </div>
     </div>
 
-    <!-- Success Message -->
     @if(session('success'))
     <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded">
         <div class="flex items-center">
@@ -51,7 +49,6 @@
     </div>
     @endif
 
-    <!-- Quick Stats -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="flex items-center justify-between">
@@ -107,7 +104,6 @@
         </div>
     </div>
 
-    <!-- Search & Filter -->
     <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <form method="GET" action="{{ route('admin.books.index') }}" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1">
@@ -142,11 +138,19 @@
                 </select>
             </div>
             
+            <div class="w-full md:w-48">
+                <select name="visibility" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
+                    <option value="">Tous les statuts</option>
+                    <option value="visible" {{ request('visibility') == 'visible' ? 'selected' : '' }}>Visible</option>
+                    <option value="hidden" {{ request('visibility') == 'hidden' ? 'selected' : '' }}>Caché</option>
+                </select>
+            </div>
+            
             <button type="submit" class="px-6 py-3 bg-[#01B3BB] text-white rounded-xl font-medium hover:bg-[#008D94] transition">
                 Filtrer
             </button>
             
-            @if(request()->hasAny(['search', 'categorie', 'stock']))
+            @if(request()->hasAny(['search', 'categorie', 'stock', 'visibility']))
             <a href="{{ route('admin.books.index') }}" 
                class="px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +161,7 @@
             @endif
         </form>
         
-        @if(request()->hasAny(['search', 'categorie', 'stock']))
+        @if(request()->hasAny(['search', 'categorie', 'stock', 'visibility']))
         <div class="mt-4 text-sm text-gray-600">
             <div class="flex flex-wrap gap-2">
                 @if(request('search'))
@@ -185,12 +189,21 @@
                     Rupture seulement
                 </span>
                 @endif
+                @if(request('visibility') == 'visible')
+                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+                    Visible seulement
+                </span>
+                @endif
+                @if(request('visibility') == 'hidden')
+                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                    Caché seulement
+                </span>
+                @endif
             </div>
         </div>
         @endif
     </div>
 
-    <!-- Books Table -->
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div class="bg-[#01B3BB] text-white px-6 py-4 flex justify-between items-center">
             <h2 class="text-xl font-bold">Liste des Livres</h2>
@@ -255,6 +268,11 @@
                                     @empty
                                     <span class="text-xs text-gray-500">Aucune catégorie</span>
                                     @endforelse
+                                    @if(!$livre->visible)
+                                    <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full ml-2">
+                                        Caché
+                                    </span>
+                                    @endif
                                 </div>
                             </td>
                             <td class="py-4 px-4">
@@ -282,6 +300,25 @@
                                             @endif
                                         </button>
                                     </form>
+
+                                    <form method="POST" action="{{ route('admin.books.toggle-visibility', $livre) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" 
+                                                class="p-2 hover:bg-gray-100 rounded transition" 
+                                                title="{{ $livre->visible ? 'Cacher des clients' : 'Rendre visible' }}">
+                                            @if($livre->visible)
+                                            <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                            @else
+                                            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd"/>
+                                                <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z"/>
+                                            </svg>
+                                            @endif
+                                        </button>
+                                    </form>
                                     
                                     <form method="POST" action="{{ route('admin.books.destroy', $livre) }}" 
                                           class="inline"
@@ -304,7 +341,6 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             <div class="mt-6">
                 {{ $livres->withQueryString()->links() }}
             </div>
@@ -314,7 +350,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
                 <p class="text-lg mb-2">Aucun livre trouvé</p>
-                @if(request()->hasAny(['search', 'categorie', 'stock']))
+                @if(request()->hasAny(['search', 'categorie', 'stock', 'visibility']))
                 <p class="text-sm mb-6">Essayez de modifier vos critères de recherche ou <a href="{{ route('admin.books.index') }}" class="text-[#01B3BB] hover:underline">réinitialiser les filtres</a></p>
                 @else
                 <p class="text-sm mb-6">Commencez par <a href="{{ route('admin.books.create') }}" class="text-[#01B3BB] hover:underline">ajouter un nouveau livre</a></p>
@@ -338,7 +374,6 @@
         transition: all 0.3s ease;
     }
     
-    /* Pagination styles */
     .pagination {
         display: flex;
         justify-content: center;
