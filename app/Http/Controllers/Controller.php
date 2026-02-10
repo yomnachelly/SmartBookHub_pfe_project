@@ -43,9 +43,8 @@ class Controller extends \Illuminate\Routing\Controller
             $query->where('prix', '<=', $maxPrice);
         }
         
-        $livres = $query->where('stock', '>', 0)
-                        ->orderBy('titre')
-                        ->get();
+        $livres = $query->orderBy('titre')->get();
+
         
         if (Auth::check()) {
             $wishlistBookIds = Wishlist::where('user_id', Auth::id())

@@ -254,4 +254,10 @@ Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
 
+use Illuminate\Support\Facades\Auth;
+
+Route::get('/login/admin', function () {
+    return view('auth.login');
+})->middleware('guest')->name('login.admin');
+
 require __DIR__.'/auth.php';

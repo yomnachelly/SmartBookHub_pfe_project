@@ -158,7 +158,143 @@
             </form>
             @endif
         </div>
-        
+        @extends('layouts.app')
+
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+
+        {{-- ====== BLOC MESSAGE PRINCIPAL ====== --}}
+        <div class="
+            {{ $commande->mode_paiement === 'ligne' && $commande->statut === 'en_attente'
+                ? 'bg-yellow-50 border-yellow-200'
+                : 'bg-green-50 border-green-200' }}
+            border rounded-xl p-6 mb-8 text-center">
+
+            {{-- Icône --}}
+            <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4
+                {{ $commande->mode_paiement === 'ligne' && $commande->statut === 'en_attente'
+                    ? 'bg-yellow-100'
+                    : 'bg-green-100' }}">
+
+                @if($commande->mode_paiement === 'ligne' && $commande->statut === 'en_attente')
+                    ⏳
+                @else
+                    ✔️
+                @endif
+            </div>
+
+            {{-- Titre + message --}}
+            @if($commande->mode_paiement === 'ligne' && $commande->statut === 'en_attente')
+                <h1 class="text-2xl font-bold text-yellow-800 mb-2">
+                    Confirmation de votre commande
+                </h1>
+                <p class="text-yellow-700">
+                    Veuillez vérifier les informations ci-dessous et confirmer le paiement.
+                </p>
+            @else
+                <h1 class="text-2xl font-bold text-green-800 mb-2">
+                    Commande confirmée !
+                </h1>
+                <p class="text-green-700">
+                    Votre commande a été enregistrée avec succès.
+                </p>
+            @endif
+
+            <p class="mt-2 font-medium">
+                Référence :
+                <strong>{{ $commande->reference ?? 'CMD-' . str_pad($commande->id, 6, '0', STR_PAD_LEFT) }}</strong>
+            </p>
+
+            {{-- FACTURE : seulement si commande validée --}}
+            @if($commande->statut === 'validee')
+                <div class="mt-4">
+                    <a href="{{ route('commande.facture', $commande->id) }}"
+                       class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                        Télécharger la facture
+                    </a>
+                </div>
+            @endif
+        </div>
+
+        {{-- ====== DÉTAILS COMMANDE ====== --}}
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+            <div class="bg-gray-50 px-6 py-4">
+                <h3 class="text-lg font-bold">Résumé de votre commande</h3>
+            </div>
+
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <h4 class="font-bold mb-2">Client</h4>
+                        <p>{{ $commande->nom_client }}</p>
+                        <p>{{ $commande->email }}</p>
+                        <p>{{ $commande->telephone }}</p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold mb-2">Paiement</h4>
+                        <p>{{ $commande->adresse }}</p>
+                        <p>
+                            Mode :
+                            <strong>
+                                {{ $commande->mode_paiement === 'ligne'
+                                    ? 'Paiement en ligne'
+                                    : 'Paiement à la livraison' }}
+                            </strong>
+                        </p>
+                        <p>
+                            Statut :
+                            <span class="
+                                {{ $commande->statut === 'en_attente'
+                                    ? 'text-yellow-600'
+                                    : 'text-green-600' }}">
+                                {{ ucfirst(str_replace('_', ' ', $commande->statut)) }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Articles --}}
+                @foreach($commande->livres as $livre)
+                <div class="flex justify-between border-b py-2">
+                    <span>{{ $livre->titre }} ({{ $livre->pivot->quantite }})</span>
+                    <strong>
+                        {{ number_format($livre->pivot->quantite * $livre->pivot->prix, 3) }} dt
+                    </strong>
+                </div>
+                @endforeach
+
+                <div class="flex justify-between text-lg font-bold mt-4">
+                    <span>Total :</span>
+                    <span class="text-[#01B3BB]">{{ number_format($commande->total, 3) }} dt</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- ====== ACTIONS ====== --}}
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+
+            <a href="{{ route('welcome') }}"
+               class="bg-[#01B3BB] text-white px-6 py-3 rounded-xl hover:bg-[#008D94] transition">
+                Continuer mes achats
+            </a>
+
+            {{-- Bouton paiement UNIQUEMENT si paiement en ligne + en attente --}}
+            @if($commande->mode_paiement === 'ligne' && $commande->statut === 'en_attente')
+                <form method="POST" action="{{ route('stripe.checkout', $commande->id) }}">
+                    @csrf
+                    <button class="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600">
+                        💳 Confirmer et payer
+                    </button>
+                </form>
+            @endif
+        </div>
+
+    </div>
+</div>
+@endsection
+
         <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-center">
             <p class="text-yellow-700 text-sm">
                 <svg class="w-5 h-5 inline mr-1" fill="currentColor" viewBox="0 0 20 20">

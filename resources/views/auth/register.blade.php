@@ -105,6 +105,13 @@
                                class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFC62A] focus:border-[#FFC62A] transition"
                                placeholder="Au moins 8 caractères">
                     </div>
+                    <!-- petit rappel des règles de mot de passe -->
+    <p class="mt-2 text-xs text-green-600">
+        • Le mot de passe doit contenir au moins 8 caractères.<br>
+        • Il doit contenir au moins une majuscule et une minuscule.<br>
+        • Il doit contenir au moins un symbole.<br>
+      
+    </p>
                     @error('password')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
