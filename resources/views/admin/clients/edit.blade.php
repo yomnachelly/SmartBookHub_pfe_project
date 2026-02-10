@@ -81,8 +81,8 @@
                                    id="name" 
                                    name="name" 
                                    value="{{ old('name', $client->name) }}"
-                                   required
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
+                                   readonly
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed">
                         </div>
                         
                         <div>
@@ -93,8 +93,8 @@
                                    id="email" 
                                    name="email" 
                                    value="{{ old('email', $client->email) }}"
-                                   required
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
+                                   readonly
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed">
                         </div>
                         
                         <div>
@@ -119,8 +119,8 @@
                             </label>
                             <select id="is_active" 
                                     name="is_active" 
-                                    required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
+                                    disabled
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed">
                                 <option value="1" {{ old('is_active', $client->is_active) ? 'selected' : '' }}>Actif</option>
                                 <option value="0" {{ !old('is_active', $client->is_active) ? 'selected' : '' }}>Inactif</option>
                             </select>
@@ -156,25 +156,6 @@
                            class="flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition">
                             Annuler
                         </a>
-                        
-                        <form method="POST" 
-                              action="{{ route('admin.clients.toggle', $client) }}" 
-                              class="inline"
-                              onsubmit="return confirm('Voulez-vous vraiment {{ $client->is_active ? 'désactiver' : 'activer' }} ce client ?')">
-                            @csrf
-                            <button type="submit"
-                                    class="flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition
-                                           {{ $client->is_active ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200' }}">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    @if($client->is_active)
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                                    @else
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                    @endif
-                                </svg>
-                                {{ $client->is_active ? 'Désactiver le compte' : 'Activer le compte' }}
-                            </button>
-                        </form>
                     </div>
                 </div>
             </form>

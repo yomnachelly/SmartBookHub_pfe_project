@@ -113,26 +113,45 @@
                             @enderror
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Catégories
-                            </label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto p-3 border border-gray-300 rounded-xl">
-                                @foreach($categories as $category)
-                                <label class="flex items-center">
-                                    <input type="checkbox" 
-                                           name="categorie_ids[]" 
-                                           value="{{ $category->id_categ }}"
-                                           class="rounded border-gray-300 text-[#01B3BB] focus:ring-[#01B3BB] mr-3"
-                                           {{ in_array($category->id_categ, old('categorie_ids', [])) ? 'checked' : '' }}>
-                                    <span class="text-gray-700">{{ $category->nom_categ }}</span>
-                                </label>
-                                @endforeach
-                            </div>
-                            @error('categorie_ids')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <div x-data="{ open: false, selected: [] }" class="relative w-64">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+        Catégories
+    </label>
+    <!-- Bouton pour ouvrir la liste -->
+    <button @click="open = !open" 
+            type="button"
+            class="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-left focus:outline-none focus:ring-2 focus:ring-[#01B3BB]">
+        <span x-text="selected.length ? selected.map(id => categories.find(c => c.id_categ == id).nom_categ).join(', ') : 'Sélectionner une catégorie'"></span>
+    </button>
+
+    <!-- Liste déroulante -->
+    <div x-show="open" @click.away="open = false"
+         class="absolute mt-1 w-full bg-white border border-gray-300 rounded-xl max-h-48 overflow-y-auto z-10">
+        @foreach($categories as $category)
+        <label class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100">
+            <input type="checkbox"
+                   value="{{ $category->id_categ }}"
+                   x-model="selected"
+                   class="rounded border-gray-300 text-[#01B3BB] mr-2">
+            <span>{{ $category->nom_categ }}</span>
+        </label>
+        @endforeach
+    </div>
+
+    <!-- Champs caché pour le formulaire -->
+    <template x-for="id in selected" :key="id">
+        <input type="hidden" name="categorie_ids[]" :value="id">
+    </template>
+
+    @error('categorie_ids')
+        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+    @enderror
+</div>
+
+<script>
+    // Pour afficher les noms dans le bouton
+    const categories = @json($categories);
+</script>
 
                         <div>
                             <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
