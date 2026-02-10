@@ -187,14 +187,6 @@
 </div>
 
 
-    <!-- Input -->
-    <div style="padding: 5px; border-top: 1px solid #ddd; display:flex;">
-        <input type="text" id="chatbot-input" placeholder="Écris un message..." style="flex:1; padding:5px; border-radius:5px; border:1px solid #ccc;">
-        <button id="chatbot-send" style="margin-left:5px; background:#4CAF50; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">
-            Envoyer
-        </button>
-    </div>
-</div>
 <script>
     const avatar = document.getElementById('chatbot-avatar');
     const chatWindow = document.getElementById('chatbot-window');
