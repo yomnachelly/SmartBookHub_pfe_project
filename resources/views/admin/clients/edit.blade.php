@@ -81,8 +81,8 @@
                                    id="name" 
                                    name="name" 
                                    value="{{ old('name', $client->name) }}"
-                                   readonly
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed">
+                                   required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
                         </div>
                         
                         <div>
@@ -93,19 +93,26 @@
                                    id="email" 
                                    name="email" 
                                    value="{{ old('email', $client->email) }}"
-                                   readonly
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed">
+                                   required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
                         </div>
                         
                         <div>
                             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                                Mot de passe (laissez vide pour ne pas modifier)
+                                Nouveau mot de passe
+                                <span class="text-gray-400 font-normal">(laissez vide pour ne pas modifier)</span>
                             </label>
                             <input type="password" 
                                    id="password" 
                                    name="password"
+                                   autocomplete="new-password"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
                             <p class="text-xs text-gray-500 mt-2">Minimum 8 caractères avec lettres et chiffres</p>
+                        </div>
+
+                        <!-- Email notice shown when a password is typed -->
+                        <div id="email-notice" class="hidden bg-blue-50 border-l-4 border-blue-400 p-3 rounded-lg text-sm text-blue-700">
+                            📧 Un email contenant le nouveau mot de passe sera automatiquement envoyé au client.
                         </div>
                     </div>
 
@@ -118,9 +125,9 @@
                                 Statut du compte *
                             </label>
                             <select id="is_active" 
-        name="is_active"
-        class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed"
-        style="pointer-events: none;">
+                                    name="is_active"
+                                    required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
                                 <option value="1" {{ old('is_active', $client->is_active) ? 'selected' : '' }}>Actif</option>
                                 <option value="0" {{ !old('is_active', $client->is_active) ? 'selected' : '' }}>Inactif</option>
                             </select>
@@ -166,11 +173,16 @@
 
 @section('scripts')
 <script>
-    // Password validation
-    document.getElementById('password').addEventListener('input', function() {
-        const password = this.value;
-        
-        if (password.length > 0 && password.length < 8) {
+    const passwordInput = document.getElementById('password');
+    const emailNotice   = document.getElementById('email-notice');
+
+    passwordInput.addEventListener('input', function () {
+        const val = this.value;
+
+        // Show / hide the email notification banner
+        emailNotice.classList.toggle('hidden', val.length === 0);
+
+        if (val.length > 0 && val.length < 8) {
             this.classList.add('border-red-500');
             this.classList.remove('border-gray-300');
         } else {

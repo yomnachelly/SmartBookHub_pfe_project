@@ -44,5 +44,11 @@
                 >{{ __('Saved.') }}</p>
             @endif
         </div>
+
+        <div class="mt-4">
+            <a href="{{ route('password.request') }}" class="text-sm text-indigo-600 hover:underline">
+                {{ __('Forgot your password?') }}
+            </a>
+        </div>
     </form>
 </section>

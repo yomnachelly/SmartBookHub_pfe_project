@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Livre;
 use App\Models\Commande;
 use App\Mail\EmployeeCredentialsMail;
+use App\Mail\AdminPasswordChangedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -148,17 +149,37 @@ class AdminController extends Controller
             'is_active' => (int)$request->is_active === 1,
         ];
 
+        $plainPassword = null;
+
         if ($request->filled('password')) {
             $request->validate([
                 'password' => [Rules\Password::defaults()],
             ]);
-            $updateData['password'] = Hash::make($request->password);
+            $plainPassword = $request->password;
+            $updateData['password'] = Hash::make($plainPassword);
         }
 
         $employee->update($updateData);
 
+        // email with the new password when admin resets it
+        if ($plainPassword) {
+            try {
+                Mail::to($employee->email)->send(new AdminPasswordChangedNotification($employee, $plainPassword));
+                Log::info('Admin password-reset email sent to employee: ' . $employee->email);
+
+                return redirect()->route('admin.employees.index')
+                    ->with('success', 'Employé modifié avec succès ! Un email avec le nouveau mot de passe a été envoyé à ' . $employee->email);
+            } catch (\Exception $e) {
+                Log::error('Failed to send admin password-reset email to employee: ' . $e->getMessage());
+
+                return redirect()->route('admin.employees.index')
+                    ->with('success', 'Employé modifié avec succès !')
+                    ->with('warning', "L'email de notification n'a pas pu être envoyé. Veuillez communiquer le nouveau mot de passe manuellement.");
+            }
+        }
+
         return redirect()->route('admin.employees.index')
-            ->with('success', 'Employé modifié avec succès!');
+            ->with('success', 'Employé modifié avec succès !');
     }
 
     public function employeesToggle(User $employee)
@@ -252,17 +273,37 @@ class AdminController extends Controller
             'is_active' => (int)$request->is_active === 1,
         ];
         
+        $plainPassword = null;
+
         if ($request->filled('password')) {
             $request->validate([
                 'password' => [Rules\Password::defaults()],
             ]);
-            $updateData['password'] = Hash::make($request->password);
+            $plainPassword = $request->password;
+            $updateData['password'] = Hash::make($plainPassword);
         }
         
         $client->update($updateData);
+
+        // email with the new password when admin resets it
+        if ($plainPassword) {
+            try {
+                Mail::to($client->email)->send(new AdminPasswordChangedNotification($client, $plainPassword));
+                Log::info('Admin password-reset email sent to client: ' . $client->email);
+
+                return redirect()->route('admin.clients.index')
+                    ->with('success', 'Client modifié avec succès ! Un email avec le nouveau mot de passe a été envoyé à ' . $client->email);
+            } catch (\Exception $e) {
+                Log::error('Failed to send admin password-reset email to client: ' . $e->getMessage());
+
+                return redirect()->route('admin.clients.index')
+                    ->with('success', 'Client modifié avec succès !')
+                    ->with('warning', "L'email de notification n'a pas pu être envoyé. Veuillez communiquer le nouveau mot de passe manuellement.");
+            }
+        }
         
         return redirect()->route('admin.clients.index')
-            ->with('success', 'Client modifié avec succès!');
+            ->with('success', 'Client modifié avec succès !');
     }
 
     public function clientsDestroy(User $client)

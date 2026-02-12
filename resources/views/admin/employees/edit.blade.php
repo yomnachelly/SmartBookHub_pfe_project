@@ -39,6 +39,17 @@
                 </div>
                 @endif
 
+                @if(session('warning'))
+                <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-yellow-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="text-yellow-700">{{ session('warning') }}</p>
+                    </div>
+                </div>
+                @endif
+
                 @if($errors->any())
                 <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
                     <div class="flex items-center">
@@ -94,13 +105,20 @@
                             
                             <div>
                                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Mot de passe (laissez vide pour ne pas modifier)
+                                    Nouveau mot de passe
+                                    <span class="text-gray-400 font-normal">(laissez vide pour ne pas modifier)</span>
                                 </label>
                                 <input type="password" 
                                        id="password" 
                                        name="password"
+                                       autocomplete="new-password"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#01B3BB] focus:border-transparent">
                                 <p class="text-xs text-gray-500 mt-2">Minimum 8 caractères avec lettres et chiffres</p>
+                            </div>
+
+                            <!-- Email notice shown when a password is typed -->
+                            <div id="email-notice" class="hidden bg-blue-50 border-l-4 border-blue-400 p-3 rounded-lg text-sm text-blue-700">
+                                📧 Un email contenant le nouveau mot de passe sera automatiquement envoyé à l'employé.
                             </div>
                         </div>
 
@@ -177,7 +195,7 @@
             </div>
         </div>
 
-        <!-- Sidebar with Employee Details -->
+        <!-- Sidebar Employee Details -->
         <div class="space-y-6">
             <div class="bg-white rounded-2xl shadow-lg p-6">
                 <div class="text-center mb-6">
@@ -242,4 +260,26 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    const passwordInput = document.getElementById('password');
+    const emailNotice   = document.getElementById('email-notice');
+
+    passwordInput.addEventListener('input', function () {
+        const val = this.value;
+
+        // Show / hide the email notification banner
+        emailNotice.classList.toggle('hidden', val.length === 0);
+
+        if (val.length > 0 && val.length < 8) {
+            this.classList.add('border-red-500');
+            this.classList.remove('border-gray-300');
+        } else {
+            this.classList.remove('border-red-500');
+            this.classList.add('border-gray-300');
+        }
+    });
+</script>
 @endsection
