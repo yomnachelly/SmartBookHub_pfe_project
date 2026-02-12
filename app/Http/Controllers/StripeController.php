@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use App\Models\Commande;
+use App\Mail\InvoiceMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class StripeController extends Controller
 {
@@ -12,20 +15,20 @@ class StripeController extends Controller
     {
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        // Conversion TND -> USD (Stripe ne supporte pas TND)
-        $tauxChange = 0.32; // Exemple : 1 TND = 0.32 USD
+        // conversion TND -> USD
+        $tauxChange = 0.32;
         $montantUSD = round($commande->total * $tauxChange, 2);
-        $montantStripe = (int)($montantUSD * 100); // en centimes
+        $montantStripe = (int)($montantUSD * 100);
 
-        // Créer session Stripe
+        // creation de session Stripe
         $session = Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [[
                 'price_data' => [
-                    'currency' => 'usd', // Stripe gère USD
+                    'currency' => 'usd',
                     'product_data' => [
                         'name' => 'Commande #' . $commande->id,
-                        'description' => "{$commande->total} TND", // Affiche TND pour l’utilisateur
+                        'description' => "{$commande->total} TND",
                     ],
                     'unit_amount' => $montantStripe,
                 ],
@@ -42,7 +45,6 @@ class StripeController extends Controller
             ]
         ]);
 
-        // Enregistrer l'ID de session dans la commande
         $commande->update([
             'stripe_session_id' => $session->id,
         ]);
@@ -52,7 +54,42 @@ class StripeController extends Controller
 
     public function success()
     {
-        return view('stripe.success');
+        $sessionId = request()->query('session_id');
+        $commande = null;
+        $invoiceSent = null;
+        $emailError = null;
+
+        if ($sessionId) {
+            try {
+                Stripe::setApiKey(config('services.stripe.secret'));
+                $session = Session::retrieve($sessionId);
+
+                if (isset($session->metadata->commande_id)) {
+                    $commande = Commande::find($session->metadata->commande_id);
+
+                    if ($commande && $session->payment_status === 'paid') {
+                        $commande->update([
+                            'statut' => 'validee',
+                            'stripe_payment_intent' => $session->payment_intent ?? null,
+                        ]);
+
+                        try {
+                            Mail::to($commande->email)->send(new InvoiceMail($commande));
+                            $invoiceSent = true;
+                            Log::info('Facture envoyée après paiement réussi pour la commande #' . $commande->id);
+                        } catch (\Exception $e) {
+                            $invoiceSent = false;
+                            $emailError = $e->getMessage();
+                            Log::error('Erreur lors de l\'envoi de la facture: ' . $e->getMessage());
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Erreur lors de la récupération de la session Stripe: ' . $e->getMessage());
+            }
+        }
+
+        return view('stripe.success', compact('commande', 'invoiceSent', 'emailError'));
     }
 
     public function cancel()

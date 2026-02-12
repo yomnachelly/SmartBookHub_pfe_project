@@ -59,7 +59,8 @@ class CommandeValidee extends Notification
             'reference' => $this->commande->reference,
             'total' => $this->commande->total,
             'statut' => $this->commande->statut,
-            'message' => 'Votre commande #' . $this->commande->id . ' a été validée.'
+            'message' => 'Votre commande #' . $this->commande->id . ' a été validée.',
+            'url'         => route('client.commandes.show', $this->commande->id),
         ];
     }
 }

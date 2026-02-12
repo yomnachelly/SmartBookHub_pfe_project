@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Livre;
 use App\Models\Commande;
+use App\Mail\EmployeeCredentialsMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 
 class AdminController extends Controller
@@ -67,7 +70,7 @@ class AdminController extends Controller
         ));
     }
 
-    // ================= EMPLOYEE MANAGEMENT =================
+    // ------------------- EMPLOYEE MANAGEMENT -------------------
 
     public function employeesIndex()
     {
@@ -91,16 +94,31 @@ class AdminController extends Controller
             'password' => ['required', Rules\Password::defaults()],
         ]);
 
-        User::create([
+        // Stocker le mot de passe en clair temporairement pour l'email
+        $plainPassword = $request->password;
+
+        // créer l'employé
+        $employee = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($plainPassword),
             'role' => 'employe',
             'is_active' => true,
         ]);
 
-        return redirect()->route('admin.employees.index')
-            ->with('success', 'Employé créé avec succès!');
+        // envoi d'email avec les identifiants (employé)
+        try {
+            Mail::to($employee->email)->send(new EmployeeCredentialsMail($employee, $plainPassword));
+            Log::info('Employee credentials email sent to: ' . $employee->email);
+            
+            return redirect()->route('admin.employees.index')
+                ->with('success', 'Employé créé avec succès ! Un email avec les identifiants a été envoyé à ' . $employee->email);
+        } catch (\Exception $e) {
+            Log::error('Failed to send employee credentials email: ' . $e->getMessage());
+            
+            return redirect()->route('admin.employees.index')
+                ->with('warning', 'Employé créé avec succès, mais l\'email n\'a pas pu être envoyé. Veuillez communiquer les identifiants manuellement.');
+        }
     }
 
     public function employeesEdit(User $employee)
@@ -156,7 +174,7 @@ class AdminController extends Controller
         return back()->with('success', 'Statut de l\'employé modifié avec succès!');
     }
 
-    // ================= CLIENT MANAGEMENT =================
+    // ------------------- CLIENT MANAGEMENT -------------------
 
     public function clientsIndex()
     {

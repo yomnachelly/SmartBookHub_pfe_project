@@ -325,11 +325,16 @@ class CommandeController extends Controller
             $livre->decrement('stock', $quantitePanier);
         }
         
-        try {
-            Mail::to($commande->email)->send(new InvoiceMail($commande));
-            \Log::info('Invoice sent for new order #' . $commande->id . ' to ' . $commande->email);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send invoice for new order: ' . $e->getMessage());
+        if ($request->mode_paiement === 'ligne') {
+            try {
+                Mail::to($commande->email)->send(new InvoiceMail($commande));
+                \Log::info('Invoice sent for online payment order #' . $commande->id . ' to ' . $commande->email);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send invoice for online payment order: ' . $e->getMessage());
+            }
+        } else {
+            // paiement à domicile
+            \Log::info('Order #' . $commande->id . ' created with sur_place payment - no invoice email sent');
         }
         
         if (Auth::check()) {
@@ -356,7 +361,7 @@ class CommandeController extends Controller
         }
         
         return redirect()->route('commande.confirmation')->with([
-            'success' => 'Commande passée avec succès! Un email de confirmation vous a été envoyé.',
+            'success' => 'Commande passée avec succès!',
             'commande_id' => $commande->id
         ]);
     }
@@ -509,24 +514,28 @@ class CommandeController extends Controller
     {
         try {
             $commande = Commande::findOrFail($id);
-            
+
             if ($commande->statut === 'validee') {
                 return redirect()->back()->with('info', 'Cette commande est déjà validée.');
             }
-            
-            $ancienStatut = $commande->statut;
+
             $commande->statut = 'validee';
             $commande->save();
-            
+
+            $user = User::find($commande->user_id);
+            if ($user) {
+                $user->notify(new \App\Notifications\CommandeValidee($commande));
+            }
+
             try {
                 Mail::to($commande->email)->send(new InvoiceMail($commande));
-                \Log::info('Invoice resent for validated order #' . $commande->id . ' to ' . $commande->email);
+                \Log::info('Invoice sent for validated order #' . $commande->id);
             } catch (\Exception $e) {
-                \Log::error('Failed to send invoice for validated order: ' . $e->getMessage());
+                \Log::error('Failed to send invoice: ' . $e->getMessage());
             }
-            
+
             return redirect()->back()->with('success', 'Commande validée et facture envoyée au client');
-            
+
         } catch (\Exception $e) {
             \Log::error('Failed to validate order: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Erreur: ' . $e->getMessage());

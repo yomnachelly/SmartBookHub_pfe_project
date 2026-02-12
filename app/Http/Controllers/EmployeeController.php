@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Livre;
 use App\Models\Commande;
+use App\Mail\PasswordChangedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
 use Carbon\Carbon;
@@ -118,7 +120,6 @@ class EmployeeController extends Controller
         return $activities;
     }
 
-    // ================= CLIENT MANAGEMENT =================
 
     public function clientsIndex(Request $request)
     {
@@ -182,14 +183,34 @@ class EmployeeController extends Controller
             'is_active' => (int)$request->is_active === 1,
         ];
         
-        if ($request->filled('password')) {
+        $passwordChanged = false;
+        
+        if ($request->filled('password') && !empty($request->password)) {
             $request->validate([
-                'password' => [Rules\Password::defaults()],
+                'password' => ['confirmed', Rules\Password::defaults()],
             ]);
+            
             $updateData['password'] = Hash::make($request->password);
+            $passwordChanged = true;
+            
+            \Log::info('Password changed by employee for client: ' . $client->email);
         }
         
         $client->update($updateData);
+        
+        // email notification if password was changed
+        if ($passwordChanged) {
+            try {
+                Mail::to($client->email)->send(new PasswordChangedNotification($client));
+                \Log::info('Password change email sent to client: ' . $client->email);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send password change email to ' . $client->email . ': ' . $e->getMessage());
+                
+                return redirect()->route('employe.clients.index')
+                    ->with('success', 'Client modifié avec succès!')
+                    ->with('warning', 'L\'email de confirmation n\'a pas pu être envoyé.');
+            }
+        }
         
         return redirect()->route('employe.clients.index')
             ->with('success', 'Client modifié avec succès!');
@@ -208,7 +229,6 @@ class EmployeeController extends Controller
         return back()->with('success', 'Statut du client modifié avec succès!');
     }
 
-    // ================= COMMANDES MANAGEMENT =================
 
     public function commandesIndex()
     {
