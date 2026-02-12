@@ -118,9 +118,9 @@
                                 Statut du compte *
                             </label>
                             <select id="is_active" 
-                                    name="is_active" 
-                                    disabled
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed">
+        name="is_active"
+        class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed"
+        style="pointer-events: none;">
                                 <option value="1" {{ old('is_active', $client->is_active) ? 'selected' : '' }}>Actif</option>
                                 <option value="0" {{ !old('is_active', $client->is_active) ? 'selected' : '' }}>Inactif</option>
                             </select>
