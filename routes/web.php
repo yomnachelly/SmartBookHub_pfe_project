@@ -65,7 +65,8 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->prefix('admin')->
         Route::get('/{client}', [AdminController::class, 'clientsShow'])->name('show');
         Route::get('/{client}/edit', [AdminController::class, 'clientsEdit'])->name('edit');
         Route::put('/{client}', [AdminController::class, 'clientsUpdate'])->name('update');
-        Route::post('/{user}/toggle', [AdminController::class, 'clientsToggle'])->name('toggle');
+       Route::post('/{client}/toggle', [AdminController::class, 'clientsToggle'])->name('toggle');
+
         Route::get('/create', [AdminController::class, 'clientsCreate'])->name('create');
         Route::post('/', [AdminController::class, 'clientsStore'])->name('store');
         Route::delete('/{client}', [AdminController::class, 'clientsDestroy'])->name('destroy');
