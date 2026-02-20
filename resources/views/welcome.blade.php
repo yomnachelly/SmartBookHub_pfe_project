@@ -36,63 +36,71 @@
                         </div>
                     </div>
                 </div>
+<div class="w-full lg:w-3/5 text-center order-1 lg:order-2 px-4 lg:px-0">
+    <div id="heroCarousel" class="relative overflow-hidden">
+        
+        <!-- Slides wrapper -->
+        <div class="flex transition-transform duration-700 ease-in-out" id="heroSlides">
 
-                <div class="w-full lg:w-3/5 text-center order-1 lg:order-2 px-4 lg:px-0">
-                    <div class="inline-flex items-center gap-3 mb-8 px-4 py-2.5 
-                            bg-white/15 backdrop-blur-sm rounded-full border border-white/25">
-                        <div class="w-2 h-2 rounded-full bg-[#FFC62A] animate-pulse"></div>
-                        <span class="text-white/95 text-sm font-medium tracking-wider">
-                            مكتبة تعليمية متخصصة
-                        </span>
-                    </div>
-                    
-                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-                        <span class="block mb-2">إصدارات</span>
-                        <span class="font-bold bg-gradient-to-r from-white via-white/95 to-white/90 
-                                    bg-clip-text text-transparent drop-shadow-lg">
-                            طارق البريكي
-                        </span>
-                    </h1>
-                    
-                    <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide 
-                            leading-relaxed max-w-2xl mx-auto">
-                        <span class="font-medium">رياضيات</span> • 
-                        <span class="font-medium">إيقاظ</span> • 
-                        <span class="font-medium">مناهج تعليمية</span>
-                    </p>
-                    
-                    <div class="relative mb-10">
-                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
-                                    bg-white/10 backdrop-blur-sm px-6 py-1.5 rounded-full">
-                            <span class="text-white/60 text-xs font-medium tracking-wider">
-                                المؤلف المتميز
-                            </span>
-                        </div>
-                        <div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                    </div>
-                    
-                    <div class="flex flex-wrap justify-center gap-3 mb-12 max-w-2xl mx-auto">
-                        <span class="px-5 py-2.5 bg-white/12 backdrop-blur-sm rounded-full 
-                                    text-white text-sm font-medium border border-white/25 
-                                    hover:bg-white/20 hover:border-white/40 
-                                    transition-all duration-300 hover:scale-105">
-                            كتب منهجية
-                        </span>
-                        <span class="px-5 py-2.5 bg-white/12 backdrop-blur-sm rounded-full 
-                                    text-white text-sm font-medium border border-white/25 
-                                    hover:bg-white/20 hover:border-white/40 
-                                    transition-all duration-300 hover:scale-105">
-                            تمارين محلولة
-                        </span>
-                        <span class="px-5 py-2.5 bg-white/12 backdrop-blur-sm rounded-full 
-                                    text-white text-sm font-medium border border-white/25 
-                                    hover:bg-white/20 hover:border-white/40 
-                                    transition-all duration-300 hover:scale-105">
-                            شرح مبسط
-                        </span>
-                    </div>
+            <!-- Slide 1 -->
+            <div class="min-w-full">
+                <div class="inline-flex items-center gap-3 mb-8 px-4 py-2.5 
+                        bg-white/15 backdrop-blur-sm rounded-full border border-white/25">
+                    <div class="w-2 h-2 rounded-full bg-[#FFC62A] animate-pulse"></div>
+                    <span class="text-white/95 text-sm font-medium tracking-wider">
+                        مكتبة تعليمية متخصصة
+                    </span>
                 </div>
 
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+                    <span class="block mb-2">إصدارات</span>
+                    <span class="font-bold bg-gradient-to-r from-white via-white/95 to-white/90 
+                                bg-clip-text text-transparent drop-shadow-lg">
+                         طارق البريكي
+                    </span>
+                </h1>
+
+                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
+                    منصة لبيع الكتب التعليمية بطريقة سهلة وسريعة
+                </p>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="min-w-full">
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+                    كتب منهجية
+                </h1>
+
+                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
+                    كتب مدرسية منظمة حسب المستويات مع شرح مبسط
+                </p>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="min-w-full">
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+                    تمارين محلولة
+                </h1>
+
+                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
+                    تمارين مع حلول مفصلة لتسهيل الفهم
+                </p>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="min-w-full">
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+                    تجربة شراء سهلة
+                </h1>
+
+                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
+                    إضافة للسلة • قائمة المفضلة • بحث سريع
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
                 <!-- Author image -->
                 <div class="w-full lg:w-2/5 order-3">
                     <div class="relative flex justify-center lg:justify-end">
@@ -417,6 +425,16 @@
             </aside>
         </div>
     </div>
+    <script>
+    const slides = document.getElementById('heroSlides');
+    const totalSlides = slides.children.length;
+    let index = 0;
+
+    setInterval(() => {
+        index = (index + 1) % totalSlides;
+        slides.style.transform = `translateX(-${index * 100}%)`;
+    }, 2000);
+</script>
 @endsection
 
 @section('scripts')
@@ -645,4 +663,5 @@
         animation: spin 1s linear infinite;
     }
 </style>
+
 @endsection
