@@ -64,39 +64,115 @@
                     منصة لبيع الكتب التعليمية بطريقة سهلة وسريعة
                 </p>
             </div>
+  <!-- Slide 4 -->
+<div class="min-w-full text-center">
 
-            <!-- Slide 2 -->
-            <div class="min-w-full">
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-                    كتب منهجية
-                </h1>
+    <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+        تجربة شراء سهلة
+    </h1>
 
-                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
-                    كتب مدرسية منظمة حسب المستويات مع شرح مبسط
-                </p>
-            </div>
+    <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
+        إضافة للسلة • قائمة المفضلة • بحث سريع
+    </p>
 
-            <!-- Slide 3 -->
-            <div class="min-w-full">
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-                    تمارين محلولة
-                </h1>
+    <!-- ANIMATION LOTTIE -->
+    <div class="flex justify-center mb-10">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-xl">
+            <dotlottie-wc
+                src="https://lottie.host/a18e8bd3-5804-435d-a342-e51f247209c5/7tQ1cO0ocZ.lottie"
+                class="w-[100px] h-[100px] md:w-[100px] md:h-[100px]"
+                autoplay
+                loop>
+            </dotlottie-wc>
+        </div>
+    </div>
 
-                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
-                    تمارين مع حلول مفصلة لتسهيل الفهم
-                </p>
-            </div>
+</div>
+          <!-- Slide 2 -->
+<div class="min-w-full flex flex-col md:flex-row items-center justify-between gap-10">
 
-            <!-- Slide 4 -->
-            <div class="min-w-full">
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-                    تجربة شراء سهلة
-                </h1>
+    <!-- TEXTE -->
+    <div class="text-center md:text-left max-w-2xl">
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+            À propos
+        </h1>
 
-                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
-                    إضافة للسلة • قائمة المفضلة • بحث سريع
-                </p>
-            </div>
+        <p class="text-lg md:text-xl text-white/85 mb-10 font-light tracking-wide leading-relaxed">
+            Découvrez la plateforme, son objectif et le parcours de l’auteur.
+        </p>
+
+        <a href="{{ route('apropos') }}" 
+           class="inline-flex items-center gap-2 px-6 py-3 bg-white/15 backdrop-blur-sm 
+                  border border-white/25 rounded-full text-white font-medium 
+                  hover:bg-white/25 hover:scale-105 transition group">
+            
+            <svg class="w-5 h-5 animate-pulse group-hover:animate-bounce transition" 
+                 fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" 
+                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" 
+                      clip-rule="evenodd"/>
+            </svg>
+
+            <span>Voir la page</span>
+        </a>
+    </div>
+
+    <!-- ANIMATION LOTTIE -->
+    <div class="flex justify-center md:justify-end">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-xl">
+            <dotlottie-wc
+                src="https://lottie.host/67f181d6-1e6e-4cf9-a160-3987acaaa1bd/GPRikcyAkI.lottie"
+                class="w-[260px] h-[260px] md:w-[320px] md:h-[320px]"
+                autoplay
+                loop>
+            </dotlottie-wc>
+        </div>
+    </div>
+
+</div>
+           <!-- Slide 3 -->
+<div class="min-w-full flex flex-col md:flex-row items-center justify-between gap-10">
+
+    <!-- TEXTE -->
+    <div class="text-center md:text-left max-w-2xl">
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+            Contact
+        </h1>
+
+        <p class="text-lg md:text-xl text-white/85 mb-10 font-light tracking-wide leading-relaxed">
+            Une question ou une demande ? N’hésitez pas à nous contacter.
+        </p>
+
+        <a href="{{ route('contact') }}" 
+           class="inline-flex items-center gap-2 px-6 py-3 bg-white/15 backdrop-blur-sm 
+                  border border-white/25 rounded-full text-white font-medium 
+                  hover:bg-white/25 hover:scale-105 transition group">
+            
+            <svg class="w-5 h-5 animate-pulse group-hover:animate-bounce transition" 
+                 fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+            </svg>
+
+            <span>Envoyer un message</span>
+        </a>
+    </div>
+
+    <!-- ANIMATION LOTTIE -->
+    <div class="flex justify-center md:justify-end">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-xl">
+            <dotlottie-wc
+                src="https://lottie.host/dd656bd3-c27a-4820-b408-6d5bd033427b/k2ATZasDuC.lottie"
+                class="w-[260px] h-[260px] md:w-[320px] md:h-[320px]"
+                autoplay
+                loop>
+            </dotlottie-wc>
+        </div>
+    </div>
+
+</div>
+
+          
 
         </div>
     </div>
@@ -433,7 +509,7 @@
     setInterval(() => {
         index = (index + 1) % totalSlides;
         slides.style.transform = `translateX(-${index * 100}%)`;
-    }, 2000);
+    }, 2600);
 </script>
 @endsection
 
