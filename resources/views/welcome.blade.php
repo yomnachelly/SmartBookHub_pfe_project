@@ -130,6 +130,31 @@
     </div>
 
 </div>
+<!-- Slide 5 -->
+<div class="min-w-full flex flex-col lg:flex-row items-center justify-center gap-10 px-4 lg:px-20">
+
+    <!-- Texte à gauche -->
+    <div class="text-center lg:text-left max-w-lg">
+        <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
+            Assistant Intelligent
+        </h1>
+
+        <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed">
+            Pose tes questions et obtiens des réponses instantanées grâce à notre assistant intelligent.
+        </p>
+    </div>
+
+    <!-- Animation à droite -->
+    <div class="flex justify-center lg:justify-end">
+        <dotlottie-wc
+            src="https://lottie.host/9e3bc69d-44b3-4dc6-9406-41618e7901ea/tH4fbbH7L9.lottie"
+            class="w-[300px] h-[300px] md:w-[400px] md:h-[400px]"
+            autoplay
+            loop>
+        </dotlottie-wc>
+    </div>
+
+</div>
            <!-- Slide 3 -->
 <div class="min-w-full flex flex-col md:flex-row items-center justify-between gap-10">
 
@@ -239,7 +264,17 @@
                     @if(isset($livres) && count($livres) > 0)
                         @foreach($livres as $livre)
                         <div class="book-card bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition relative group cursor-pointer">
-                            <a href="{{ route('book.show', $livre->id_livre) }}" class="absolute inset-0 z-10"></a>
+                         @if(\Carbon\Carbon::parse($livre->created_at)->diffInDays(now()) <= 7)
+    <div class="absolute top-2 right-2 z-20 w-14 h-14 pointer-events-none">
+        <dotlottie-wc
+            src="https://lottie.host/3905217e-800c-43ed-8deb-57fd9de150e1/exJ2kIkPnp.lottie"
+            autoplay
+            loop
+            style="width: 100%; height: 100%;">
+        </dotlottie-wc>
+    </div>
+@endif
+                        <a href="{{ route('book.show', $livre->id_livre) }}" class="absolute inset-0 z-10"></a>
                             
                             <div class="relative">
                                 @if($livre->image && file_exists(storage_path('app/public/' . $livre->image)))
@@ -353,9 +388,11 @@
                             <input type="hidden" name="max_price" value="{{ e(request('max_price')) }}">
                         @endif
                         
-                        <select name="categorie" 
-                                onchange="this.form.submit()" 
-                                class="w-full p-3 rounded-lg text-[#1E1E1E] bg-white border-2 border-gray-200 focus:outline-none focus:border-[#FFC62A]">
+                       <select id="categorieSelect"
+        name="categorie" 
+        onchange="this.form.submit()" 
+        class="w-full p-3 rounded-lg text-[#1E1E1E] bg-white border-2 border-gray-200 
+               focus:outline-none focus:border-[#FFC62A] animate-pulse">
                             <option value="">Toutes les catégories</option>
                             @if(isset($categories) && count($categories) > 0)
                                 @foreach($categories as $id => $name)
@@ -553,6 +590,17 @@
                 } else {
                     this.submit();
                 }
+                const categorieSelect = document.getElementById('categorieSelect');
+
+if (categorieSelect) {
+    if (categorieSelect.value !== "") {
+        categorieSelect.classList.remove('animate-pulse');
+    }
+
+    categorieSelect.addEventListener('change', function () {
+        this.classList.remove('animate-pulse');
+    });
+}
             });
         }
         
@@ -738,6 +786,20 @@
     .animate-spin {
         animation: spin 1s linear infinite;
     }
+    @keyframes pulseCategorie {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 198, 42, 0.5);
+        border-color: #FFC62A;
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(255, 198, 42, 0);
+        border-color: #01B3BB;
+    }
+}
+
+.animate-pulse {
+    animation: pulseCategorie 2s infinite;
+}
 </style>
 
 @endsection

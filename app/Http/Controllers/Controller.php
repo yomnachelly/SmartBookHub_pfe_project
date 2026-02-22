@@ -78,8 +78,8 @@ class Controller extends \Illuminate\Routing\Controller
                 ];
             }
         }
-        
-        return view('welcome', compact('livres', 'categories', 'plagesPrix'));
+        $dernierLivreId = Livre::where('visible', true)->latest()->value('id_livre');
+        return view('welcome', compact('livres', 'categories', 'plagesPrix','dernierLivreId'));
     }
     
     private function calculatePriceRanges()
