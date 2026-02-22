@@ -286,7 +286,9 @@
                                         </svg>
                                     </div>
                                 @endif
-                                <div class="hover-actions absolute top-4 left-4 flex gap-2 opacity-0 invisible transition-all duration-300">
+                                <div class="hover-actions absolute top-4 left-4 flex gap-2
+            opacity-0 invisible transition-all duration-300
+            group-hover:opacity-100 group-hover:visible">
                                     @if($livre->stock > 0)
                                     <form method="POST" action="{{ route('panier.ajouter', $livre->id_livre) }}" class="z-20 relative">
                                         @csrf
@@ -800,6 +802,7 @@ if (categorieSelect) {
 .animate-pulse {
     animation: pulseCategorie 2s infinite;
 }
+
 </style>
 
 @endsection
