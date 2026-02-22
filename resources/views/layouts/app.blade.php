@@ -181,7 +181,7 @@
 {{-- ==================== SCRIPT ==================== --}}
 <script>
 let chatPanelOpen = false;
-let panelWidth = Math.max(window.innerWidth * 0.5, 320);
+let panelWidth = Math.max(window.innerWidth * 0.3, 280); // 30% de l'écran ou minimum 280px
 let isResizing = false;
 let startX = 0;
 let startWidth = 0;
