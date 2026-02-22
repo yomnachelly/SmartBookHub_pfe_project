@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="h-8"></div>
+<section class="relative overflow-hidden bg-[#01B3BB]">
+    
+</section>
     <section class="relative overflow-hidden bg-[#01B3BB]">
         <div class="absolute inset-0 bg-gradient-to-br from-[#01B3BB] via-[#2ac8d0] to-[#4ECFD7]">
             <div class="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_30%_40%,_white_0px,_transparent_1px)] bg-[length:40px_40px]"></div>
