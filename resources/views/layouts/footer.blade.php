@@ -54,8 +54,8 @@
                     class="mt-1 w-5 h-5 accent-[#FFC62A] bg-gray-800 border-gray-600 rounded"
                 >
                 <label for="legal-news" class="cursor-pointer leading-relaxed">
-                    Enim quis fugiat consequat elit minim nisi eu occaecat occaecat deserunt aliquip nisi ex deserunt.<br>
-                    Aliquip nisi ex deserunt.
+                    Je confirme vouloir recevoir les emails de <strong>Smart Book</strong> (nouveautés, offres spéciales et actualités ). 
+       
                 </label>
             </div>
         </div>
