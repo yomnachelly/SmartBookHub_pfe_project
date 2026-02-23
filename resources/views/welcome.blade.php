@@ -262,7 +262,143 @@
                         Chercher
                     </button>
                 </form>
+<!-- Petit carrousel des nouveaux livres -->
+@php
+    $nouveauxLivres = $livres->filter(function($livre) {
+        return \Carbon\Carbon::parse($livre->created_at)->diffInDays(now()) <= 7;
+    })->take(6); // Limiter à 6 nouveaux livres maximum
+@endphp
 
+@if($nouveauxLivres->count() > 0)
+<div class="mb-12">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="bg-[#FFC62A] p-2 rounded-full">
+            <svg class="w-5 h-5 text-[#1E1E1E]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"/>
+            </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-[#1E1E1E]">Nouveautés de la semaine</h2>
+        <span class="bg-[#01B3BB] text-white text-sm px-3 py-1 rounded-full">{{ $nouveauxLivres->count() }} nouveaux livres</span>
+    </div>
+    
+    <div class="relative group/carousel">
+        <!-- Carousel container plus petit que la grille normale -->
+        <div class="overflow-hidden rounded-xl">
+            <div id="newBooksCarousel" class="flex transition-transform duration-500 ease-in-out gap-4">
+                @foreach($nouveauxLivres as $livre)
+                <div class="min-w-[180px] md:min-w-[200px] flex-shrink-0">
+                    <div class="book-card-small bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition relative">
+                        @if(\Carbon\Carbon::parse($livre->created_at)->diffInDays(now()) <= 7)
+                        <div class="absolute top-1 right-1 z-20 w-10 h-10 pointer-events-none">
+                            <dotlottie-wc
+                                src="https://lottie.host/3905217e-800c-43ed-8deb-57fd9de150e1/exJ2kIkPnp.lottie"
+                                autoplay
+                                loop
+                                style="width: 100%; height: 100%;">
+                            </dotlottie-wc>
+                        </div>
+                        @endif
+                        
+                        <a href="{{ route('book.show', $livre->id_livre) }}" class="absolute inset-0 z-10"></a>
+                        
+                        <div class="relative">
+                            @if($livre->image && file_exists(storage_path('app/public/' . $livre->image)))
+                                <img src="{{ asset('storage/' . $livre->image) }}" alt="{{ $livre->titre }}" class="w-full h-36 object-cover">
+                            @else
+                                <div class="w-full h-36 bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] flex items-center justify-center">
+                                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <div class="p-3">
+                            <h4 class="font-bold text-[#1E1E1E] text-sm mb-1 truncate">{{ $livre->titre }}</h4>
+                            <p class="text-[#FFC62A] font-bold text-base">{{ number_format($livre->prix, 3) }} dt</p>
+                            <p class="text-gray-600 text-xs truncate">{{ $livre->auteur }}</p>
+                            <div class="mt-1">
+                                @if($livre->stock > 0)
+                                    <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+                                        En stock
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        
+        <!-- Boutons de navigation (optionnels) -->
+        @if($nouveauxLivres->count() > 4)
+        <button onclick="slideNewBooks('prev')" class="absolute -left-3 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity z-30 hover:bg-gray-100">
+            <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <button onclick="slideNewBooks('next')" class="absolute -right-3 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity z-30 hover:bg-gray-100">
+            <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+        @endif
+    </div>
+</div>
+
+<style>
+.book-card-small {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.book-card-small:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+}
+</style>
+
+<script>
+let newBooksIndex = 0;
+const newBooksCarousel = document.getElementById('newBooksCarousel');
+if (newBooksCarousel) {
+    const totalNewBooks = {{ $nouveauxLivres->count() }};
+    const visibleItems = window.innerWidth < 768 ? 2 : 4; // 2 items sur mobile, 4 sur desktop
+    
+    // Auto-slide toutes les 4 secondes
+    setInterval(() => {
+        if (totalNewBooks > visibleItems) {
+            newBooksIndex = (newBooksIndex + 1) % (totalNewBooks - visibleItems + 1);
+            const slideWidth = newBooksCarousel.children[0].offsetWidth + 16; // width + gap
+            newBooksCarousel.style.transform = `translateX(-${newBooksIndex * slideWidth}px)`;
+        }
+    }, 4000);
+}
+
+function slideNewBooks(direction) {
+    const carousel = document.getElementById('newBooksCarousel');
+    const totalBooks = carousel.children.length;
+    const visibleItems = window.innerWidth < 768 ? 2 : 4;
+    const slideWidth = carousel.children[0].offsetWidth + 16; // width + gap
+    
+    if (direction === 'next' && newBooksIndex < totalBooks - visibleItems) {
+        newBooksIndex++;
+    } else if (direction === 'prev' && newBooksIndex > 0) {
+        newBooksIndex--;
+    }
+    
+    carousel.style.transform = `translateX(-${newBooksIndex * slideWidth}px)`;
+}
+</script>
+@endif
+<!-- Titre simple avant tous les livres -->
+<div class="mb-4">
+    <h2 class="text-2xl font-bold text-[#1E1E1E] inline-block">
+        Tous nos livres
+    </h2>
+    <span class="ml-3 bg-[#01B3BB] text-white text-sm px-3 py-1 rounded-full">
+        {{ $livres->total() ?? count($livres) }} livres
+    </span>
+</div>
                 <!-- books -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     @if(isset($livres) && count($livres) > 0)
