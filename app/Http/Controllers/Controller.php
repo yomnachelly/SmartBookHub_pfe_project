@@ -10,78 +10,65 @@ use Illuminate\Support\Facades\Auth;
 
 class Controller extends \Illuminate\Routing\Controller
 {
-    public function welcome(Request $request)
-    {
-        $search = $request->input('search');
-        $selectedCategory = $request->input('categorie');
-        $minPrice = $request->input('min_price');
-        $maxPrice = $request->input('max_price');
-        
-        $query = Livre::query();
-        
-        $query->where('visible', true);
-        
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('titre', 'like', '%' . $search . '%')
-                  ->orWhere('auteur', 'like', '%' . $search . '%')
-                  ->orWhere('editeur', 'like', '%' . $search . '%');
-            });
-        }
-        
-        if ($selectedCategory) {
-            $query->whereHas('categories', function($q) use ($selectedCategory) {
-                $q->where('categories.id_categ', $selectedCategory);
-            });
-        }
-        
-        if ($minPrice !== null) {
-            $query->where('prix', '>=', $minPrice);
-        }
-        
-        if ($maxPrice !== null) {
-            $query->where('prix', '<=', $maxPrice);
-        }
-        
-        $livres = $query->orderBy('titre')->get();
+   public function welcome(Request $request)
+{
+    $search         = $request->input('search');
+    $selectedCategory = $request->input('categorie');
+    $minPrice       = $request->input('min_price');
+    $maxPrice       = $request->input('max_price');
 
-        
-        if (Auth::check()) {
-            $wishlistBookIds = Wishlist::where('user_id', Auth::id())
-                ->pluck('livre_id')
-                ->toArray();
-            
-            foreach ($livres as $livre) {
-                $livre->is_in_wishlist = in_array($livre->id_livre, $wishlistBookIds);
-            }
-        }
-        
-        $categories = Categorie::orderBy('nom_categ')
-                              ->pluck('nom_categ', 'id_categ')
-                              ->toArray();
-        
-        $priceRanges = $this->calculatePriceRanges();
-        
-        $plagesPrix = [];
-        foreach ($priceRanges as $range) {
-            $count = Livre::whereBetween('prix', [$range['min'], $range['max']])
-                          ->where('visible', true)
-                          ->where('stock', '>', 0)
-                          ->count();
-            
-            if ($count > 0) {
-                $plagesPrix[] = [
-                    'min' => $range['min'],
-                    'max' => $range['max'],
-                    'label' => $range['label'],
-                    'count' => $count
-                ];
-            }
-        }
-        $dernierLivreId = Livre::where('visible', true)->latest()->value('id_livre');
-        return view('welcome', compact('livres', 'categories', 'plagesPrix','dernierLivreId'));
+    $query = Livre::query()
+        ->where('visible', true)
+        ->with('categories');
+
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->where('titre',   'like', "%{$search}%")
+              ->orWhere('auteur',  'like', "%{$search}%")
+              ->orWhere('editeur', 'like', "%{$search}%");
+        });
     }
-    
+
+    if ($selectedCategory) {
+        $query->whereHas('categories', function($q) use ($selectedCategory) {
+            $q->where('categories.id_categ', $selectedCategory);
+        });
+    }
+
+    if ($minPrice !== null && is_numeric($minPrice)) {
+        $query->where('prix', '>=', $minPrice);
+    }
+
+    if ($maxPrice !== null && is_numeric($maxPrice)) {
+        $query->where('prix', '<=', $maxPrice);
+    }
+
+    // Pagination : 8 livres par page
+    $livres = $query->orderBy('titre')->paginate(8);
+
+    // Garder les favoris (wishlist) si connecté
+    if (Auth::check()) {
+        $wishlistBookIds = Wishlist::where('user_id', Auth::id())
+            ->pluck('livre_id')
+            ->toArray();
+
+        foreach ($livres as $livre) {
+            $livre->is_in_wishlist = in_array($livre->id_livre, $wishlistBookIds);
+        }
+    }
+
+    $categories = Categorie::orderBy('nom_categ')
+        ->pluck('nom_categ', 'id_categ')
+        ->toArray();
+
+    $plagesPrix = $this->getPriceRangesWithCounts();
+
+    return view('welcome', compact(
+        'livres',
+        'categories',
+        'plagesPrix'
+    ));
+}
     private function calculatePriceRanges()
     {
         $minPrice = Livre::where('visible', true)->where('stock', '>', 0)->min('prix') ?? 0;
@@ -196,4 +183,35 @@ class Controller extends \Illuminate\Routing\Controller
         
         return view('books.search', compact('livres', 'query', 'categories'));
     }
+    private function getPriceRangesWithCounts()
+{
+    $ranges = [
+        ['min' => 0,   'max' => 5,    'label' => '0 – 5 dt'],
+        ['min' => 5,   'max' => 10,   'label' => '5 – 10 dt'],
+        ['min' => 10,  'max' => 20,   'label' => '10 – 20 dt'],
+        ['min' => 20,  'max' => 30,   'label' => '20 – 30 dt'],
+        ['min' => 30,  'max' => 50,   'label' => '30 – 50 dt'],
+        ['min' => 50,  'max' => 9999, 'label' => '50 dt et plus'],
+    ];
+
+    $result = [];
+
+    foreach ($ranges as $range) {
+        $count = Livre::where('visible', true)
+            ->where('stock', '>', 0)
+            ->whereBetween('prix', [$range['min'], $range['max']])
+            ->count();
+
+        if ($count > 0) {
+            $result[] = [
+                'min'   => $range['min'],
+                'max'   => $range['max'],
+                'label' => $range['label'],
+                'count' => $count,
+            ];
+        }
+    }
+
+    return $result;
+}
 }

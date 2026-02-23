@@ -376,6 +376,9 @@
                         </div>
                     @endif
                 </div>
+                <div class="mt-10 flex justify-center">
+    {{ $livres->links('pagination::tailwind') }}   <!-- ou simple, bootstrap-4/5, etc. -->
+</div>
             </main>
 
             <!-- sidebar filter -->
