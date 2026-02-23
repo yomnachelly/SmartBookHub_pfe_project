@@ -540,10 +540,37 @@
                         @endif
                         
                     </div>
-                </div>
-            </aside>
+                    <!-- Tutoriel Vidéo -->
+<div class="mt-10 pt-6 border-t border-white/30">
+    <h3 class="text-xl font-bold mb-4">Comment utiliser la plateforme ?</h3>
+    <p class="text-sm text-white/90 mb-4 leading-relaxed">
+        Découvrez en moins de 3 minutes comment naviguer, chercher et acheter vos livres facilement.
+    </p>
+
+    <div class="relative rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-black/20 backdrop-blur-sm">
+        <div class="aspect-video">
+            <iframe 
+                class="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/63YybNw9hzY?si=2EytMYc3_hAWDDIY"
+                title="Tutoriel utilisation plateforme"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+            </iframe>
         </div>
     </div>
+</div>
+                </div>
+            </aside>
+            
+        </div>
+        
+    </div>
+    
+        <!-- BANDEAU NEWSLETTER FNAC - PLUS BAS + PLUS ÉTROIT + SCRIPT FIXÉ -->
+    
+   
     <script>
     const slides = document.getElementById('heroSlides');
     const totalSlides = slides.children.length;
@@ -554,6 +581,7 @@
         slides.style.transform = `translateX(-${index * 100}%)`;
     }, 2600);
 </script>
+
 @endsection
 
 @section('scripts')

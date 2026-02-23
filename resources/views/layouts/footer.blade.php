@@ -1,4 +1,65 @@
 <footer class="bg-[#01B3BB] text-white mt-16 rounded-tr-[50px] overflow-hidden">
+    <section class="bg-black text-white py-6 md:py-8 border-t border-white/10 mb-0 -mb-px">
+        <div class="max-w-1xl mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+                
+                <!-- Gauche : Icône + Texte (exact comme ta capture) -->
+                <div class="flex items-start gap-5 flex-1">
+                    <div class="text-5xl mt-1">✉️</div>
+                    <div>
+                        <h3 class="text-xl font-bold uppercase tracking-widest">Obtenez les dernières offres</h3>
+                        <h4 class="text-lg text-[#FFC62A] font-bold">smart book hub</h4>
+                        <p class="mt-1.5 text-base font-light">Restez à jour avec nos offres</p>
+                    </div>
+                </div>
+
+                <!-- Formulaire (maintenant avec <form> pour que le script marche) -->
+                <form class="w-full lg:w-auto flex flex-col sm:flex-row gap-3" id="newsletter-form">
+                    <input 
+                        type="email" 
+                        placeholder="Votre email" 
+                       class="flex-1 lg:w-72 px-5 py-3 bg-gray-800 border border-gray-700 focus:border-[#FFC62A] rounded-full text-white placeholder-gray-400 text-sm focus:outline-none transition"
+                        required
+                    >
+                    <button 
+                        type="submit"
+                       class="bg-[#FFC62A] hover:bg-[#FFD666] text-black px-8 py-3 rounded-full font-bold text-sm uppercase tracking-wider transition shadow-md whitespace-nowrap"
+                    >
+                        S'abonner
+                    </button>
+                </form>
+            </div>
+ <script>
+    // Script newsletter (fonctionne maintenant)
+    const newsletterForm = document.getElementById('newsletter-form');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const emailInput = this.querySelector('input[type="email"]');
+            
+            if (emailInput.value.trim() !== '') {
+                alert('🎉 Merci ! Vous êtes maintenant abonné aux alertes indispensables de smart book hub.');
+                emailInput.value = ''; // vide le champ
+            } else {
+                alert('Veuillez entrer votre adresse email.');
+            }
+        });
+    }
+</script>
+            <!-- Checkbox lorem (comme sur ta capture) -->
+            <div class="mt-6 flex items-start gap-3 text-sm text-white/75 max-w-3xl">
+                <input 
+                    type="checkbox" 
+                    id="legal-news" 
+                    class="mt-1 w-5 h-5 accent-[#FFC62A] bg-gray-800 border-gray-600 rounded"
+                >
+                <label for="legal-news" class="cursor-pointer leading-relaxed">
+                    Enim quis fugiat consequat elit minim nisi eu occaecat occaecat deserunt aliquip nisi ex deserunt.<br>
+                    Aliquip nisi ex deserunt.
+                </label>
+            </div>
+        </div>
+    </section>
     <div class="container mx-auto px-4 py-12">
         <!-- Main footer content -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
