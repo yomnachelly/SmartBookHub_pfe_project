@@ -759,9 +759,112 @@ function slideNewBooks(direction) {
             </aside>
             
         </div>
-        
+        {{-- ====================== CAROUSEL CATÉGORIES (comme la photo) ====================== --}}
+{{-- ====================== CAROUSEL CATÉGORIES (version corrigée + petite) ====================== --}}
+{{-- ====================== CAROUSEL CATÉGORIES (images livres réelles + petite taille) ====================== --}}
+<div class="mb-16">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="bg-[#FFC62A] p-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#1E1E1E]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2" />
+            </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-[#1E1E1E]">Découvrez nos catégories</h2>
     </div>
-    
+
+    <div class="relative group/carousel">
+        <div class="overflow-hidden rounded-2xl">
+            <div id="categoriesCarousel" class="flex transition-transform duration-500 ease-in-out gap-4">
+                @php
+                    // Tableau d'images fixes par catégorie (ajoute/enlève selon tes vraies catégories)
+                    $categoryImages = [
+                        'livres-enfants' => 'https://thumbs.dreamstime.com/b/stack-children-s-story-books-colorful-covers-isolated-white-colorful-stack-children-s-story-books-displayed-368866956.jpg',
+                        'mangas-bandes-dessinees' => 'https://c8.alamy.com/comp/BHJ3E3/manga-japanese-comic-books-in-a-pile-BHJ3E3.jpg',
+                        'romans' => 'https://hips.hearstapps.com/hmg-prod/images/elle-book-romance-2025-lead-694c0b8d72dc7.jpg?crop=0.8888888888888888xw:1xh;center,top&resize=1200:*',
+                        'developpement-personnel' => 'https://www.myselfhelphabit.co.uk/wp-content/uploads/2023/02/Personal-Development-Books-IMG_5196.jpg',
+                        'paperbacks' => 'https://www.bookclique.org/wp-content/uploads/book-hoarding-1024x614.jpg',
+                        // Ajoute 'puzzle' si tu as la catégorie : 'puzzle' => 'URL_ICI',
+                        // Pour les autres, mets une image générique de pile de livres
+                        'default' => 'https://thumbs.dreamstime.com/b/stack-colorful-children-s-storybooks-learning-creative-imagination-charming-vibrantly-colored-books-invites-young-368866972.jpg',
+                    ];
+                @endphp
+
+                @if(isset($categories) && count($categories) > 0)
+                    @foreach($categories as $id => $name)
+                        @php
+                            // Normalise le nom pour matcher les clés (minuscules, tirets, etc.)
+                            $key = strtolower(str_replace(' ', '-', $name));
+                            $key = str_replace(['&', ' et '], '-', $key);
+                            $imageUrl = $categoryImages[$key] ?? $categoryImages['default'];
+                        @endphp
+
+                        <div class="min-w-[150px] md:min-w-[170px] flex-shrink-0">
+                            <div class="category-card bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300">
+                                <a href="{{ url('/') }}?categorie={{ e($id) }}" class="block">
+                                    <div class="relative">
+                                        <img src="{{ $imageUrl }}" 
+                                             alt="{{ e($name) }}" 
+                                             class="w-full h-[140px] md:h-[150px] object-cover">
+                                    </div>
+                                    <div class="p-3.5 text-center">
+                                        <h4 class="font-bold text-[#1E1E1E] text-[14px] md:text-[15px] leading-tight">{{ e($name) }}</h4>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+
+        @if(isset($categories) && count($categories) > 3)
+        <button onclick="slideCategories('prev')" 
+                class="absolute -left-3 top-1/2 -translate-y-1/2 bg-white rounded-full p-2.5 shadow-xl opacity-0 group-hover/carousel:opacity-100 transition z-30 hover:bg-gray-100">
+            <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <button onclick="slideCategories('next')" 
+                class="absolute -right-3 top-1/2 -translate-y-1/2 bg-white rounded-full p-2.5 shadow-xl opacity-0 group-hover/carousel:opacity-100 transition z-30 hover:bg-gray-100">
+            <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+        @endif
+    </div>
+</div>
+   <script>
+let categoriesIndex = 0;
+const categoriesCarousel = document.getElementById('categoriesCarousel');
+
+if (categoriesCarousel) {
+    const total = categoriesCarousel.children.length;
+    const visibleItems = window.innerWidth < 768 ? 2 : 4;
+
+    // Auto-slide
+    setInterval(() => {
+        if (total > visibleItems) {
+            categoriesIndex = (categoriesIndex + 1) % (total - visibleItems + 1);
+            const slideWidth = categoriesCarousel.children[0].offsetWidth + 16; // gap-4
+            categoriesCarousel.style.transform = `translateX(-${categoriesIndex * slideWidth}px)`;
+        }
+    }, 4500);
+}
+
+function slideCategories(direction) {
+    const carousel = document.getElementById('categoriesCarousel');
+    if (!carousel) return;
+
+    const total = carousel.children.length;
+    const visibleItems = window.innerWidth < 768 ? 2 : 4;
+    const slideWidth = carousel.children[0] ? carousel.children[0].offsetWidth + 16 : 0;
+
+    if (direction === 'next' && categoriesIndex < total - visibleItems) categoriesIndex++;
+    else if (direction === 'prev' && categoriesIndex > 0) categoriesIndex--;
+
+    carousel.style.transform = `translateX(-${categoriesIndex * slideWidth}px)`;
+}
+</script>
         <!-- BANDEAU NEWSLETTER FNAC - PLUS BAS + PLUS ÉTROIT + SCRIPT FIXÉ -->
     
    
@@ -1028,7 +1131,19 @@ if (categorieSelect) {
 .animate-pulse {
     animation: pulseCategorie 2s infinite;
 }
-
+.category-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px -8px rgba(0,0,0,0.12);
+}
+.category-card {
+    transition: all 0.3s ease;
+}
+.category-card:hover {
+    transform: translateY(-6px);
+}
 </style>
 
 @endsection
