@@ -250,7 +250,62 @@
             <div class="w-1 h-1 rounded-full bg-white/15 -ml-3 mt-3 animate-pulse" style="animation-delay: 1s"></div>
         </div>
     </section>
+{{-- ====================== BANDE ORANGE STICKY ====================== --}}
+<nav class="sticky top-0 z-[60] bg-[#FFC62A] shadow-lg py-4">
+    <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        
+        <!-- Dropdown "Toute Les Catégories" (exactement comme l'image) -->
+        <div class="relative w-72">
+            <select 
+                id="topCategorySelect"
+                onchange="applyTopCategory(this.value)"
+                class="w-full bg-white text-[#1E1E1E] font-semibold text-base px-6 py-3.5 rounded-3xl border-0 focus:outline-none focus:ring-4 focus:ring-white/50 appearance-none cursor-pointer">
+                
+                <option value="">Toute Les Catégories</option>
+                
+                @if(isset($categories) && count($categories) > 0)
+                    @foreach($categories as $id => $name)
+                        @if(!empty($name))
+                            <option value="{{ e($id) }}" {{ request('categorie') == $id ? 'selected' : '' }}>
+                                {{ e($name) }}
+                            </option>
+                        @endif
+                    @endforeach
+                @endif
+            </select>
+            
+            <!-- Flèche personnalisée -->
+            <div class="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-[#1E1E1E]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+        </div>
 
+        <!-- Liens de la barre (exactement comme l'image) -->
+        <div class="flex items-center gap-x-9 text-white font-semibold text-[15px] tracking-wide">
+            <a href="{{ url('/') }}?sort=best" class="hover:text-[#FFC62A] transition-colors">Meilleures Ventes</a>
+            <a href="{{ url('/') }}?categorie=developpement-personnel" class="hover:text-[#FFC62A] transition-colors">Développement Personnel</a>
+            <a href="{{ url('/') }}?sort=popular" class="hover:text-[#FFC62A] transition-colors">Les Plus Populaires</a>
+            <a href="{{ url('/') }}?promo=1" class="hover:text-[#FFC62A] transition-colors">Promotions</a>
+            <a href="{{ url('/') }}?sort=new" class="hover:text-[#FFC62A] transition-colors">Nouveautés</a>
+        </div>
+    </div>
+</nav>
+{{-- ====================== FIN BANDE ORANGE ====================== --}}
+<script>
+function applyTopCategory(value) {
+    let url = new URL(window.location.href);
+    
+    if (value) {
+        url.searchParams.set('categorie', value);
+    } else {
+        url.searchParams.delete('categorie');
+    }
+    // garder les autres filtres (search, prix, etc.)
+    window.location.href = url.toString();
+}
+</script>
     <!-- main -->
     <div class="container mx-auto px-4 py-8">
         <div class="flex gap-6">
