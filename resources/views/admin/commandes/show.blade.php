@@ -104,10 +104,82 @@
                         @break
                 @endswitch
             </div>
-            <div class="text-sm text-gray-500">
-                <p>Créée le : {{ $commande->created_at->format('d/m/Y à H:i') }}</p>
-                <p>Dernière mise à jour : {{ $commande->updated_at->format('d/m/Y à H:i') }}</p>
-            </div>
+          <!-- Ajout : Mode de paiement + État réel -->
+          <div class="space-y-2 text-sm mt-4 pt-3 border-t">
+              <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Mode de paiement :</span>
+                  <span class="font-medium capitalize">
+                      @if($commande->mode_paiement === 'ligne')
+                          En ligne
+                      @elseif($commande->mode_paiement === 'sur_place')
+                          Paiement sur place
+                      @elseif($commande->mode_paiement)
+                          {{ ucfirst($commande->mode_paiement) }}
+                      @else
+                          Non défini
+                      @endif
+                  </span>
+              </div>
+
+              <!-- On n'affiche l'état du paiement QUE si c'est un paiement en ligne -->
+              @if($commande->mode_paiement === 'ligne')
+
+                  <div class="flex justify-between items-center">
+                      <span class="text-gray-600">État du paiement :</span>
+
+                      @if($commande->statut === 'validee')
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                              </svg>
+                              Payé avec succès
+                          </span>
+
+                      @elseif($commande->statut === 'en_attente')
+                          @if($commande->stripe_session_id && str_starts_with($commande->stripe_session_id, 'cs_test_'))
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                  </svg>
+                                  Non terminé / abandonné
+                              </span>
+                          @elseif($commande->stripe_session_id)
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  Session créée – statut à confirmer
+                              </span>
+                          @else
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                  Pas de session Stripe
+                              </span>
+                          @endif
+
+                      @elseif($commande->statut === 'annulee')
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                              Annulé
+                          </span>
+
+                      @else
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                              —
+                          </span>
+                      @endif
+                  </div>
+
+              @elseif($commande->mode_paiement === 'sur_place')
+                  <div class="flex justify-between items-center">
+                      <span class="text-gray-600">État du paiement :</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                          À régler à la livraison / sur place
+                      </span>
+                  </div>
+
+              @endif
+          </div>
+
+          <div class="text-sm text-gray-500 mt-4">
+              <p>Crée le : {{ $commande->created_at->format('d/m/Y à H:i') }}</p>
+              <p>Dernière mise à jour : {{ $commande->updated_at->format('d/m/Y à H:i') }}</p>
+          </div>
         </div>
 
         <!-- Order Summary -->

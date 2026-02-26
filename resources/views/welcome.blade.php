@@ -254,15 +254,11 @@
 <nav class="sticky top-0 z-[60] bg-[#FFC62A] shadow-lg py-4">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
-        <!-- Dropdown "Toute Les Catégories" (exactement comme l'image) -->
+        <!-- Dropdown catégories (tu gardes tel quel, il marche déjà) -->
         <div class="relative w-72">
-            <select 
-                id="topCategorySelect"
-                onchange="applyTopCategory(this.value)"
+            <select id="topCategorySelect" onchange="applyTopCategory(this.value)"
                 class="w-full bg-white text-[#1E1E1E] font-semibold text-base px-6 py-3.5 rounded-3xl border-0 focus:outline-none focus:ring-4 focus:ring-white/50 appearance-none cursor-pointer">
-                
                 <option value="">Toute Les Catégories</option>
-                
                 @if(isset($categories) && count($categories) > 0)
                     @foreach($categories as $id => $name)
                         @if(!empty($name))
@@ -273,8 +269,6 @@
                     @endforeach
                 @endif
             </select>
-            
-            <!-- Flèche personnalisée -->
             <div class="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 text-[#1E1E1E]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
@@ -282,13 +276,15 @@
             </div>
         </div>
 
-        <!-- Liens de la barre (exactement comme l'image) -->
+        <!-- Liens qui scrollent maintenant (smooth) -->
         <div class="flex items-center gap-x-9 text-white font-semibold text-[15px] tracking-wide">
-            <a href="{{ url('/') }}?sort=best" class="hover:text-[#FFC62A] transition-colors">Meilleures Ventes</a>
-            <a href="{{ url('/') }}?categorie=developpement-personnel" class="hover:text-[#FFC62A] transition-colors">Développement Personnel</a>
-            <a href="{{ url('/') }}?sort=popular" class="hover:text-[#FFC62A] transition-colors">Les Plus Populaires</a>
-            <a href="{{ url('/') }}?promo=1" class="hover:text-[#FFC62A] transition-colors">Promotions</a>
-            <a href="{{ url('/') }}?sort=new" class="hover:text-[#FFC62A] transition-colors">Nouveautés</a>
+            <a href="#plus-demandes" class="hover:text-[#FFC62A] transition-colors">Meilleures Ventes</a>
+            <a href="{{ url('/') }}"  class="hover:text-[#1E1E1E] transition-colors" id="allBooksBtn">Tous les livres</a>
+            <a href="#plus-demandes" class="hover:text-[#FFC62A] transition-colors">Les Plus Populaires</a>
+             <a href="{{ url('/') }}?categorie=developpement-personnel" class="hover:text-[#1E1E1E] transition-colors">Promotions</a>
+          
+            <a href="#nouveautes" class="hover:text-[#FFC62A] transition-colors">Nouveautés</a>
+            
         </div>
     </div>
 </nav>
@@ -325,7 +321,7 @@ function applyTopCategory(value) {
 @endphp
 
 @if($nouveauxLivres->count() > 0)
-<div class="mb-12">
+<div class="mb-12" id="nouveautes">
     <div class="flex items-center gap-3 mb-4">
         <div class="bg-[#FFC62A] p-2 rounded-full">
             <svg class="w-5 h-5 text-[#1E1E1E]" fill="currentColor" viewBox="0 0 20 20">
@@ -383,6 +379,7 @@ function applyTopCategory(value) {
                     </div>
                 </div>
                 @endforeach
+                
             </div>
         </div>
         
@@ -399,6 +396,7 @@ function applyTopCategory(value) {
             </svg>
         </button>
         @endif
+        
     </div>
 </div>
 
@@ -445,8 +443,68 @@ function slideNewBooks(direction) {
 }
 </script>
 @endif
+<!-- ====================== LES PLUS DEMANDÉS ====================== -->
+@if($bestSellers->isNotEmpty())
+<div class="mb-16" id="plus-demandes">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="bg-gradient-to-r from-[#FFC62A] to-[#FFD666] p-3 rounded-full shadow-md">
+            <svg class="w-7 h-7 text-[#1E1E1E]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l-5.5 9h11L12 2zM4 13h16v2H4v-2zm0 4h16v2H4v-2z"/>
+            </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-[#1E1E1E]">Les plus demandés</h2>
+        <span class="bg-[#01B3BB] text-white px-4 py-1.5 rounded-full text-sm font-semibold">
+            Top {{ $bestSellers->count() }}
+        </span>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+        @foreach($bestSellers as $livre)
+        <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all group relative">
+            
+            <a href="{{ route('book.show', $livre->id_livre) }}" class="absolute inset-0 z-10"></a>
+            
+            <div class="relative">
+                @if($livre->image && file_exists(storage_path('app/public/' . $livre->image)))
+                    <img src="{{ asset('storage/' . $livre->image) }}" 
+                         alt="{{ $livre->titre }}" 
+                         class="w-full h-52 object-cover">
+                @else
+                    <div class="w-full h-52 bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] flex items-center justify-center">
+                        <svg class="w-16 h-16 text-white/70" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                        </svg>
+                    </div>
+                @endif
+
+                <!-- Badge rang (top 3) -->
+                @if($loop->iteration <= 3)
+                <div class="absolute top-3 right-3 bg-[#FFC62A] text-[#1E1E1E] text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full border-2 border-white shadow">
+                    {{ $loop->iteration }}
+                </div>
+                @endif
+            </div>
+
+            <div class="p-4">
+                <h4 class="font-bold text-[#1E1E1E] mb-1 line-clamp-2">{{ $livre->titre }}</h4>
+                <p class="text-[#FFC62A] font-bold text-lg">{{ number_format($livre->prix, 3) }} dt</p>
+                <p class="text-gray-600 text-sm">{{ $livre->auteur }}</p>
+
+                @if($livre->total_vendu > 0)
+                <div class="mt-3 inline-flex items-center gap-1 bg-[#01B3BB]/10 text-[#01B3BB] text-xs px-3 py-1 rounded-full">
+                    <span class="font-semibold">{{ $livre->total_vendu }}</span>
+                    <span>vendus</span>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+</div>
+@endif
 <!-- Titre simple avant tous les livres -->
-<div class="mb-4">
+<div class="mb-4" id="tous-les-livres">
     <h2 class="text-2xl font-bold text-[#1E1E1E] inline-block">
         Tous nos livres
     </h2>
@@ -606,134 +664,292 @@ function slideNewBooks(direction) {
                         </select>
                     </form>
 
-                    <!-- by price -->
-                    <h3 class="text-xl font-bold mt-8 mb-4">Choisir un prix (dt)</h3>
-                    <div class="px-2">                        
-                        <form method="GET" action="{{ url('/') }}" id="priceForm">
-                            @if(request()->filled('search'))
-                                <input type="hidden" name="search" value="{{ e(request('search')) }}">
-                            @endif
-                            @if(request()->filled('categorie'))
-                                <input type="hidden" name="categorie" value="{{ e(request('categorie')) }}">
-                            @endif
-                            
-                            <div class="mt-6 pt-4 border-t border-white/30">
-                                <h4 class="font-bold mb-3">Plage de prix:</h4>
-                                <div class="space-y-2">
-                                    <button type="submit" name="clear_price" value="1" class="w-full text-left px-3 py-2 rounded-lg transition 
-                                                {{ !request()->filled('min_price') && !request()->filled('max_price') ? 
-                                                    'bg-[#FFC62A] text-[#1E1E1E] font-bold' : 
-                                                    'bg-white/10 hover:bg-white/20' }}">
-                                        Tous les prix
-                                    </button>
-                                    
-                                    <!-- dynamic prices range -->
-                                    @if(isset($plagesPrix) && count($plagesPrix) > 0)
-                                        @foreach($plagesPrix as $plage)
-                                            <button type="submit" name="apply_price_range" value="{{ e($plage['min']) }}_{{ e($plage['max']) }}" class="w-full text-left px-3 py-2 rounded-lg transition 
-                                                        {{ request('min_price') == $plage['min'] && request('max_price') == $plage['max'] ? 
-                                                            'bg-[#FFC62A] text-[#1E1E1E] font-bold' : 
-                                                            'bg-white/10 hover:bg-white/20' }}">
-                                                {{ e($plage['label']) }}
-                                                <span class="text-xs opacity-75 float-right">({{ e($plage['count']) }})</span>
-                                            </button>
-                                        @endforeach
-                                    @else
-                                        <p class="text-sm text-center opacity-75">Aucune plage de prix disponible</p>
-                                    @endif
-                                    
-                                </div>
-                            </div>
-                        </form>
-                        
-                        <!-- custom price filter -->
-                        <div class="mt-6 pt-4 border-t border-white/30">
-                            <h4 class="font-bold mb-3">Prix personnalisé:</h4>
-                            <form method="GET" action="{{ url('/') }}">
-                                @if(request()->filled('search'))
-                                    <input type="hidden" name="search" value="{{ e(request('search')) }}">
-                                @endif
-                                @if(request()->filled('categorie'))
-                                    <input type="hidden" name="categorie" value="{{ e(request('categorie')) }}">
-                                @endif
-                                
-                                <div class="grid grid-cols-2 gap-2 mb-3">
-                                    <div>
-                                        <label class="block text-sm mb-1">Min (dt)</label>
-                                        <input type="number" name="min_price" min="0" max="10000" step="0.5" 
-                                               value="{{ request('min_price', '') }}" 
-                                               class="w-full p-2 rounded text-[#1E1E1E]">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm mb-1">Max (dt)</label>
-                                        <input type="number" name="max_price" min="0" max="10000" step="0.5" 
-                                               value="{{ request('max_price', '') }}" 
-                                               class="w-full p-2 rounded text-[#1E1E1E]">
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button type="submit" 
-                                            class="flex-1 bg-[#FFC62A] text-[#1E1E1E] px-3 py-2 rounded font-bold hover:bg-[#FFD666] transition">
-                                        Appliquer
-                                    </button>
-                                    @if(request()->filled('min_price') || request()->filled('max_price'))
-                                    <a href="{{ url('/') }}?{{ http_build_query(request()->except(['min_price', 'max_price', 'page'])) }}"
-                                       class="flex-1 bg-white/20 text-center px-3 py-2 rounded hover:bg-white/30 transition">
-                                        Effacer
-                                    </a>
-                                    @endif
-                                </div>
-                            </form>
-                        </div>
-                        
-                        @if(request()->filled('search') || request()->filled('categorie') || request()->filled('min_price') || request()->filled('max_price'))
-                        <div class="mt-6 pt-4 border-t border-white/30">
-                            <h4 class="font-bold mb-3">Filtres actifs:</h4>
-                            <div class="space-y-2">
-                                @if(request()->filled('search'))
-                                <div class="flex items-center justify-between bg-white/10 p-2 rounded">
-                                    <span class="text-sm">Recherche: "{{ e(request('search')) }}"</span>
-                                    <a href="{{ url('/') }}?{{ http_build_query(request()->except(['search', 'page'])) }}"
-                                       class="text-white/70 hover:text-white">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </a>
-                                </div>
-                                @endif
-                                
-                                @if(request()->filled('categorie'))
-                                <div class="flex items-center justify-between bg-white/10 p-2 rounded">
-                                    <span class="text-sm">Catégorie: {{ e(request('categorie')) }}</span>
-                                    <a href="{{ url('/') }}?{{ http_build_query(request()->except(['categorie', 'page'])) }}"
-                                       class="text-white/70 hover:text-white">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </a>
-                                </div>
-                                @endif
-                                
-                                @if(request()->filled('min_price') && request()->filled('max_price'))
-                                <div class="flex items-center justify-between bg-white/10 p-2 rounded">
-                                    <span class="text-sm">Prix: {{ e(request('min_price')) }}dt - {{ e(request('max_price')) }}dt</span>
-                                    <a href="{{ url('/') }}?{{ http_build_query(request()->except(['min_price', 'max_price', 'page'])) }}"
-                                       class="text-white/70 hover:text-white">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </a>
-                                </div>
-                                @endif
-                                
-                                <a href="{{ url('/') }}" class="block w-full text-center mt-4 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded transition">
-                                    Effacer tous les filtres
-                                </a>
-                            </div>
-                        </div>
-                        @endif
-                        
-                    </div>
+                  <!-- by price - version corrigée -->
+<!-- by price - version corrigée -->
+<h3 class="text-xl font-bold mt-8 mb-4 text-white">Choisir un prix (dt)</h3>
+<div class="px-4 pb-6">
+
+    <form method="GET" action="{{ url('/') }}" id="priceSliderForm">
+        @if(request()->filled('search'))
+            <input type="hidden" name="search" value="{{ request('search') }}">
+        @endif
+        @if(request()->filled('categorie'))
+            <input type="hidden" name="categorie" value="{{ request('categorie') }}">
+        @endif
+
+        <input type="hidden" name="min_price" id="minPriceHidden" value="{{ request('min_price', 0) }}">
+        <input type="hidden" name="max_price" id="maxPriceHidden" value="{{ request('max_price', 200) }}">
+
+        @php
+            $minPossible = 0;
+            $maxPossible = 200;
+            $currentMin = (int)request('min_price', $minPossible);
+            $currentMax = (int)request('max_price', $maxPossible);
+            
+            // Ensure values are within bounds
+            $currentMin = max($minPossible, min($currentMin, $maxPossible));
+            $currentMax = max($minPossible, min($currentMax, $maxPossible));
+        @endphp
+
+        <!-- Valeurs affichées -->
+        <div class="flex justify-between items-center mb-6 text-white">
+            <div class="bg-white/30 backdrop-blur-sm px-5 py-2.5 rounded-2xl border border-white/40 font-semibold">
+                <span id="minValueDisplay">{{ $currentMin }}</span> dt
+            </div>
+            <div class="text-white/70 font-light">—</div>
+            <div class="bg-white/30 backdrop-blur-sm px-5 py-2.5 rounded-2xl border border-white/40 font-semibold">
+                <span id="maxValueDisplay">{{ $currentMax }}</span> dt
+            </div>
+        </div>
+
+        <!-- Slider double -->
+        <!-- Slider double -->
+<div class="relative h-12 mb-6">
+    <!-- Track de fond -->
+    <div class="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/20 rounded-full"></div>
+    
+    <!-- Barre jaune -->
+    <div id="progress" 
+         class="absolute top-1/2 -translate-y-1/2 h-2 bg-[#FFC62A] rounded-full"
+         style="left: {{ ($currentMin / $maxPossible) * 100 }}%; width: {{ (($currentMax - $currentMin) / $maxPossible) * 100 }}%;"></div>
+
+    <!-- Conteneur des curseurs -->
+    <div class="absolute inset-0 px-3" id="priceSliderContainer">   <!-- ← AJOUTE CET ID -->
+        
+        <!-- Curseur MAX (on le met en premier dans le DOM) -->
+        <input type="range" id="maxRange" 
+               min="{{ $minPossible }}" max="{{ $maxPossible }}" step="1"
+               value="{{ $currentMax }}"
+               class="absolute w-full appearance-none bg-transparent cursor-pointer"
+               style="margin:0; padding:0; height:48px; top:50%; transform:translateY(-50%); left:-3px; width:calc(100% + 6px); z-index:20;">
+
+        <!-- Curseur MIN -->
+        <input type="range" id="minRange" 
+               min="{{ $minPossible }}" max="{{ $maxPossible }}" step="1"
+               value="{{ $currentMin }}"
+               class="absolute w-full appearance-none bg-transparent cursor-pointer"
+               style="margin:0; padding:0; height:48px; top:50%; transform:translateY(-50%); left:-3px; width:calc(100% + 6px); z-index:30;">
+    </div>
+</div>
+        <!-- Bouton -->
+        <button type="submit" 
+                class="w-full mt-6 bg-[#FFC62A] hover:bg-[#FFD666] text-[#1E1E1E] font-bold py-3.5 rounded-3xl transition active:scale-95">
+            Appliquer
+        </button>
+
+        @if(request()->filled('min_price') || request()->filled('max_price'))
+        <a href="{{ url('/') }}?{{ http_build_query(request()->except(['min_price','max_price','page'])) }}"
+           class="block mt-3 text-center bg-white/20 hover:bg-white/30 text-white font-medium py-3 rounded-3xl transition">
+            Effacer
+        </a>
+        @endif
+    </form>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const minRange = document.getElementById('minRange');
+    const maxRange = document.getElementById('maxRange');
+    const minDisplay = document.getElementById('minValueDisplay');
+    const maxDisplay = document.getElementById('maxValueDisplay');
+    const progress = document.getElementById('progress');
+    const minHidden = document.getElementById('minPriceHidden');
+    const maxHidden = document.getElementById('maxPriceHidden');
+    const container = document.getElementById('priceSliderContainer');
+
+    if (!minRange || !maxRange || !container) return;
+
+    const minPossible = parseInt(minRange.min);
+    const maxPossible = parseInt(maxRange.max);
+    const gap = 5;   // ← petit espace minimum entre min et max (plus agréable)
+
+    function updateSlider() {
+        let minVal = parseInt(minRange.value);
+        let maxVal = parseInt(maxRange.value);
+
+        if (minVal > maxVal - gap) minVal = maxVal - gap;
+        if (maxVal < minVal + gap) maxVal = minVal + gap;
+
+        minRange.value = minVal;
+        maxRange.value = maxVal;
+
+        minDisplay.textContent = minVal;
+        maxDisplay.textContent = maxVal;
+        minHidden.value = minVal;
+        maxHidden.value = maxVal;
+
+        const minPercent = ((minVal - minPossible) / (maxPossible - minPossible)) * 100;
+        const maxPercent = ((maxVal - minPossible) / (maxPossible - minPossible)) * 100;
+
+        progress.style.left = minPercent + '%';
+        progress.style.width = (maxPercent - minPercent) + '%';
+    }
+
+    // === VERSION FLUIDE : pointer-events + détection intelligente ===
+    function activateSlider(activateMin) {
+        if (activateMin) {
+            minRange.style.zIndex = '50';
+            maxRange.style.zIndex = '10';
+            minRange.style.pointerEvents = 'auto';
+            maxRange.style.pointerEvents = 'none';
+        } else {
+            minRange.style.zIndex = '10';
+            maxRange.style.zIndex = '50';
+            minRange.style.pointerEvents = 'none';
+            maxRange.style.pointerEvents = 'auto';
+        }
+    }
+
+    // Au clic → on active le plus proche (avec petite tolérance)
+    container.addEventListener('mousedown', function(e) {
+        const rect = container.getBoundingClientRect();
+        const clickPercent = ((e.clientX - rect.left) / rect.width) * 100;
+
+        const minPercent = ((parseFloat(minRange.value) - minPossible) / (maxPossible - minPossible)) * 100;
+        const maxPercent = ((parseFloat(maxRange.value) - minPossible) / (maxPossible - minPossible)) * 100;
+
+        const distanceToMin = Math.abs(clickPercent - minPercent);
+        const distanceToMax = Math.abs(clickPercent - maxPercent);
+
+        activateSlider(distanceToMin < distanceToMax);
+    });
+
+    // Support tactile (mobile)
+    container.addEventListener('touchstart', function(e) {
+        const rect = container.getBoundingClientRect();
+        const clickPercent = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
+
+        const minPercent = ((parseFloat(minRange.value) - minPossible) / (maxPossible - minPossible)) * 100;
+        const maxPercent = ((parseFloat(maxRange.value) - minPossible) / (maxPossible - minPossible)) * 100;
+
+        const distanceToMin = Math.abs(clickPercent - minPercent);
+        const distanceToMax = Math.abs(clickPercent - maxPercent);
+
+        activateSlider(distanceToMin < distanceToMax);
+    }, { passive: true });
+
+    // On relâche la souris/touch → on réactive les deux (pour le prochain clic)
+    document.addEventListener('mouseup', () => {
+        minRange.style.pointerEvents = 'auto';
+        maxRange.style.pointerEvents = 'auto';
+    });
+    document.addEventListener('touchend', () => {
+        minRange.style.pointerEvents = 'auto';
+        maxRange.style.pointerEvents = 'auto';
+    });
+
+    // Initialisation
+    minRange.addEventListener('input', updateSlider);
+    maxRange.addEventListener('input', updateSlider);
+    updateSlider();
+
+    // Au premier chargement on active le min par défaut (plus naturel)
+    activateSlider(true);
+});
+</script>
+{{-- ====================== FILTRES AVANCÉS (Auteurs / Éditeurs / Années) ====================== --}}
+<div class="mt-10 pt-6 border-t border-white/30">
+    <h3 class="text-xl font-bold mb-6 text-white">Filtres avancés</h3>
+    
+    <form method="GET" action="{{ url('/') }}" id="advancedFiltersForm">
+        
+        {{-- Préserve TOUS les autres filtres --}}
+        @foreach(request()->query() as $key => $val)
+            @if(!in_array($key, ['auteurs', 'editeurs', 'annees', 'page']))
+                @if(is_array($val))
+                    @foreach($val as $v)
+                        <input type="hidden" name="{{ e($key) }}[]" value="{{ e($v) }}">
+                    @endforeach
+                @else
+                    <input type="hidden" name="{{ e($key) }}" value="{{ e($val) }}">
+                @endif
+            @endif
+        @endforeach
+
+        {{-- AUTEURS --}}
+        <div class="mb-8">
+            <h4 class="text-lg font-semibold mb-4 text-white flex items-center gap-2">
+                Auteurs
+                @if(request()->filled('auteurs'))
+                    <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ count(request('auteurs')) }}</span>
+                @endif
+            </h4>
+            <div class="max-h-56 overflow-y-auto pr-3 space-y-1 text-sm">   {{-- space-y-1 au lieu de space-y-2 --}}
+                @foreach($auteurs as $item)
+                    @php $val = $item['auteur']; $cnt = $item['count']; @endphp
+                    <label class="flex items-center gap-3 cursor-pointer hover:bg-white/10 py-1.5 px-3 rounded-xl transition group">  {{-- py-1.5 au lieu de p-2 --}}
+                        <input type="checkbox" 
+                               name="auteurs[]" 
+                               value="{{ e($val) }}" 
+                               {{ in_array($val, request('auteurs', [])) ? 'checked' : '' }}
+                               class="w-4 h-4 accent-[#FFC62A]">
+                        <span class="flex-1 text-white/95 group-hover:text-white">{{ e($val) }}</span>
+                        <span class="text-white/60 text-xs font-medium">({{ $cnt }})</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- MAISON D'ÉDITION --}}
+        <div class="mb-8">
+            <h4 class="text-lg font-semibold mb-4 text-white flex items-center gap-2">
+                Maison d'édition
+                @if(request()->filled('editeurs'))
+                    <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ count(request('editeurs')) }}</span>
+                @endif
+            </h4>
+            <div class="max-h-56 overflow-y-auto pr-3 space-y-1 text-sm">
+                @foreach($editeurs as $item)
+                    @php $val = $item['editeur']; $cnt = $item['count']; @endphp
+                    <label class="flex items-center gap-3 cursor-pointer hover:bg-white/10 py-1.5 px-3 rounded-xl transition group">
+                        <input type="checkbox" 
+                               name="editeurs[]" 
+                               value="{{ e($val) }}" 
+                               {{ in_array($val, request('editeurs', [])) ? 'checked' : '' }}
+                               class="w-4 h-4 accent-[#FFC62A]">
+                        <span class="flex-1 text-white/95 group-hover:text-white">{{ e($val) }}</span>
+                        <span class="text-white/60 text-xs font-medium">({{ $cnt }})</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- ANNÉES --}}
+        <div class="mb-8">
+            <h4 class="text-lg font-semibold mb-4 text-white flex items-center gap-2">
+                Année de publication
+                @if(request()->filled('annees'))
+                    <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ count(request('annees')) }}</span>
+                @endif
+            </h4>
+            <div class="max-h-56 overflow-y-auto pr-3 space-y-1 text-sm">
+                @foreach($annees as $item)
+                    @php $val = $item['annee']; $cnt = $item['count']; @endphp
+                    <label class="flex items-center gap-3 cursor-pointer hover:bg-white/10 py-1.5 px-3 rounded-xl transition group">
+                        <input type="checkbox" 
+                               name="annees[]" 
+                               value="{{ e($val) }}" 
+                               {{ in_array($val, request('annees', [])) ? 'checked' : '' }}
+                               class="w-4 h-4 accent-[#FFC62A]">
+                        <span class="flex-1 text-white/95 group-hover:text-white">{{ e($val) }}</span>
+                        <span class="text-white/60 text-xs font-medium">({{ $cnt }})</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        <button type="submit"
+                class="w-full mt-6 bg-[#FFC62A] hover:bg-[#FFD666] text-[#1E1E1E] font-bold py-3.5 rounded-3xl transition active:scale-95">
+            Appliquer les filtres
+        </button>
+
+        @if(request()->filled('auteurs') || request()->filled('editeurs') || request()->filled('annees'))
+            <a href="{{ url('/') }}?{{ http_build_query(request()->except(['auteurs','editeurs','annees','page'])) }}"
+               class="block mt-3 text-center bg-white/20 hover:bg-white/30 text-white font-medium py-3 rounded-3xl transition">
+                Effacer les filtres avancés
+            </a>
+        @endif
+    </form>
+</div>
                     <!-- Tutoriel Vidéo -->
 <div class="mt-10 pt-6 border-t border-white/30">
     <h3 class="text-xl font-bold mb-4">Comment utiliser la plateforme ?</h3>
@@ -759,17 +975,49 @@ function slideNewBooks(direction) {
             </aside>
             
         </div>
+        <style>
+/* Smooth scroll + compensation de la barre sticky */
+html {
+    scroll-behavior: smooth;
+}
+#nouveautes, 
+#plus-demandes, 
+#categories, 
+#tous-les-livres {
+    scroll-margin-top: 110px; /* hauteur de ta barre orange + marge */
+}
+</style>
+
+<script>
+// Optionnel : si tu veux encore plus de précision sur mobile
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            e.preventDefault();
+            const navHeight = 85; // ajuste si besoin
+            const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.scrollY - navHeight;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+</script>
         {{-- ====================== CAROUSEL CATÉGORIES (comme la photo) ====================== --}}
 {{-- ====================== CAROUSEL CATÉGORIES (version corrigée + petite) ====================== --}}
 {{-- ====================== CAROUSEL CATÉGORIES (images livres réelles + petite taille) ====================== --}}
-<div class="mb-16">
+<div class="mb-16" id="categories">
     <div class="flex items-center gap-3 mb-6">
         <div class="bg-[#FFC62A] p-2 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#1E1E1E]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2" />
             </svg>
         </div>
-        <h2 class="text-3xl font-bold text-[#1E1E1E]">Découvrez nos catégories</h2>
+        <h2 class="text-2xl font-bold text-[#1E1E1E]">Découvrez nos catégories</h2>
     </div>
 
     <div class="relative group/carousel">
@@ -884,6 +1132,22 @@ function slideCategories(direction) {
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // ====================== SCROLL AUTO VERS "TOUS NOS LIVRES" ======================
+        const hasAnyFilter = window.location.search.length > 0;   // il y a au moins un ?paramètre
+
+        if (hasAnyFilter) {
+            const target = document.getElementById('tous-les-livres');
+            if (target) {
+                setTimeout(() => {
+                    const navHeight = 110; // hauteur de la barre orange + marge
+                    const y = target.getBoundingClientRect().top + window.scrollY - navHeight;
+                    window.scrollTo({
+                        top: y,
+                        behavior: 'smooth'
+                    });
+                }, 180);
+            }
+        }
         const priceForm = document.getElementById('priceForm');
         if (priceForm) {
             priceForm.addEventListener('submit', function(e) {
@@ -1087,37 +1351,38 @@ if (categorieSelect) {
 </script>
 
 <style>
-    .book-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .book-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .hover-actions {
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-    
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    
-    .animate-spin {
-        animation: spin 1s linear infinite;
-    }
-    @keyframes pulseCategorie {
+   .book-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+}
+
+.hover-actions {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes pulseCategorie {
     0%, 100% {
         box-shadow: 0 0 0 0 rgba(255, 198, 42, 0.5);
         border-color: #FFC62A;
@@ -1131,18 +1396,76 @@ if (categorieSelect) {
 .animate-pulse {
     animation: pulseCategorie 2s infinite;
 }
+
 .category-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .category-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 15px 30px -8px rgba(0,0,0,0.12);
 }
-.category-card {
-    transition: all 0.3s ease;
+
+/* ===== STYLES POUR LE SLIDER DE PRIX ===== */
+#minRange, #maxRange {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    pointer-events: auto;
+    position: absolute;
+    width: calc(100% + 6px);
+    left: -3px;
+    height: 48px; /* correspond à la hauteur de la zone du slider */
 }
-.category-card:hover {
-    transform: translateY(-6px);
+
+/* Style des poignées (thumbs) */
+#minRange::-webkit-slider-thumb,
+#maxRange::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: #01B3BB;
+    border: 3px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    margin-top: -12px; /* pour centrer verticalement */
+}
+
+#minRange::-moz-range-thumb,
+#maxRange::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: #01B3BB;
+    border: 3px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* Piste transparente */
+#minRange::-webkit-slider-runnable-track,
+#maxRange::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    background: transparent;
+}
+
+#minRange::-moz-range-track,
+#maxRange::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    background: transparent;
+}
+
+/* Z-index corrigé : max au-dessus pour qu'on puisse le glisser */
+#minRange {
+    z-index: 20;
+}
+
+#maxRange {
+    z-index: 30;
 }
 </style>
 

@@ -7,7 +7,7 @@ use App\Models\Categorie;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 class Controller extends \Illuminate\Routing\Controller
 {
    public function welcome(Request $request)
@@ -42,7 +42,20 @@ class Controller extends \Illuminate\Routing\Controller
     if ($maxPrice !== null && is_numeric($maxPrice)) {
         $query->where('prix', '<=', $maxPrice);
     }
+// === NOUVEAUX FILTRES MULTIPLES ===
+$selectedAuteurs = (array) $request->input('auteurs', []);
+$selectedEditeurs = (array) $request->input('editeurs', []);
+$selectedAnnees = (array) $request->input('annees', []);
 
+if (!empty($selectedAuteurs)) {
+    $query->whereIn('auteur', $selectedAuteurs);
+}
+if (!empty($selectedEditeurs)) {
+    $query->whereIn('editeur', $selectedEditeurs);
+}
+if (!empty($selectedAnnees)) {
+    $query->whereIn(DB::raw('YEAR(annee_publication)'), $selectedAnnees);
+}
     // Pagination : 8 livres par page
     $livres = $query->orderBy('titre')->paginate(8);
 
@@ -62,11 +75,51 @@ class Controller extends \Illuminate\Routing\Controller
         ->toArray();
 
     $plagesPrix = $this->getPriceRangesWithCounts();
+    
+// Maisons d'édition
+$editeurs = Livre::select('editeur', DB::raw('count(*) as count'))
+    ->where('visible', true)
+    ->whereNotNull('editeur')
+    ->where('editeur', '!=', '')
+    ->groupBy('editeur')
+    ->orderBy('editeur')
+    ->get()
+    ->toArray();   // ← AJOUTÉ
 
+// Auteurs
+$auteurs = Livre::select('auteur', DB::raw('count(*) as count'))
+    ->where('visible', true)
+    ->whereNotNull('auteur')
+    ->where('auteur', '!=', '')
+    ->groupBy('auteur')
+    ->orderBy('auteur')
+    ->get()
+    ->toArray();   // ← AJOUTÉ
+
+// Années
+$annees = Livre::select(DB::raw('YEAR(annee_publication) as annee'), DB::raw('count(*) as count'))
+    ->where('visible', true)
+    ->whereNotNull('annee_publication')
+    ->groupBy(DB::raw('YEAR(annee_publication)'))
+    ->orderByDesc('annee')
+    ->get()
+    ->toArray();
+
+    $bestSellers = Livre::query()
+        ->where('visible', true)
+        ->withSum('commandes as total_vendu', 'commande_livre.quantite')
+        ->orderByDesc('total_vendu')
+        ->orderBy('titre')
+        ->take(3)
+        ->get();
     return view('welcome', compact(
         'livres',
         'categories',
-        'plagesPrix'
+        'plagesPrix',
+        'editeurs',
+          'auteurs',
+          'annees',
+          'bestSellers'
     ));
 }
     private function calculatePriceRanges()
