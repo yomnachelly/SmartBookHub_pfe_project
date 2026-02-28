@@ -31,7 +31,28 @@
                 
                 <form method="POST" action="{{ route('panier.valider-commande') }}" class="p-6">
                     @csrf
-                    
+                    @guest
+    <!-- Bandeau invitation à s'inscrire – visible uniquement pour les visiteurs non connectés -->
+    <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-400 p-4 mb-6 mx-6 mt-6 rounded-r-lg">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-6 h-6 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <p class="text-amber-800">
+                    <strong>Créez un compte</strong> pour suivre vos commandes, sauvegarder vos favoris et payer plus rapidement la prochaine fois&nbsp;!
+                </p>
+            </div>
+            <a href="{{ route('register') }}" 
+               class="inline-flex items-center px-5 py-2.5 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition whitespace-nowrap">
+                S'inscrire maintenant
+                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+@endguest
                     <!-- Informations client -->
                     <div class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -321,7 +321,7 @@ function applyTopCategory(value) {
 @endphp
 
 @if($nouveauxLivres->count() > 0)
-<div class="mb-12" id="nouveautes">
+<div class="mb-12" id="nouveautes">  
     <div class="flex items-center gap-3 mb-4">
         <div class="bg-[#FFC62A] p-2 rounded-full">
             <svg class="w-5 h-5 text-[#1E1E1E]" fill="currentColor" viewBox="0 0 20 20">
