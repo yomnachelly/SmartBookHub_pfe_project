@@ -279,7 +279,7 @@
         <!-- Liens qui scrollent maintenant (smooth) -->
         <div class="flex items-center gap-x-9 text-white font-semibold text-[15px] tracking-wide">
             <a href="#plus-demandes" class="hover:text-[#FFC62A] transition-colors">Meilleures Ventes</a>
-            <a href="{{ url('/') }}"  class="hover:text-[#1E1E1E] transition-colors" id="allBooksBtn">Tous les livres</a>
+            <a href="#tous-les-livres"  class="hover:text-[#1E1E1E] transition-colors" id="allBooksBtn">Tous les livres</a>
             <a href="#plus-demandes" class="hover:text-[#FFC62A] transition-colors">Les Plus Populaires</a>
              <a href="{{ url('/') }}?categorie=developpement-personnel" class="hover:text-[#1E1E1E] transition-colors">Promotions</a>
           
@@ -449,70 +449,11 @@ function slideNewBooks(direction) {
 }
 </script>
 @endif
-<!-- ====================== LES PLUS DEMANDÉS ====================== -->
-@if($bestSellers->isNotEmpty())
-<div class="mb-16" id="plus-demandes">
-    <div class="flex items-center gap-3 mb-6">
-        <div class="bg-gradient-to-r from-[#FFC62A] to-[#FFD666] p-3 rounded-full shadow-md">
-            <svg class="w-7 h-7 text-[#1E1E1E]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l-5.5 9h11L12 2zM4 13h16v2H4v-2zm0 4h16v2H4v-2z"/>
-            </svg>
-        </div>
-        <h2 class="text-2xl font-bold text-[#1E1E1E]">Les plus demandés</h2>
-        <span class="bg-[#01B3BB] text-white px-4 py-1.5 rounded-full text-sm font-semibold">
-            Top {{ $bestSellers->count() }}
-        </span>
-    </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-        @foreach($bestSellers as $livre)
-        <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all group relative">
-            
-            <a href="{{ route('book.show', $livre->id_livre) }}" class="absolute inset-0 z-10"></a>
-            
-            <div class="relative">
-                @if($livre->image && file_exists(storage_path('app/public/' . $livre->image)))
-                    <img src="{{ asset('storage/' . $livre->image) }}" 
-                         alt="{{ $livre->titre }}" 
-                         class="w-full h-52 object-cover">
-                @else
-                    <div class="w-full h-52 bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] flex items-center justify-center">
-                        <svg class="w-16 h-16 text-white/70" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-                        </svg>
-                    </div>
-                @endif
-
-                <!-- Badge rang (top 3) -->
-                @if($loop->iteration <= 3)
-                <div class="absolute top-3 right-3 bg-[#FFC62A] text-[#1E1E1E] text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full border-2 border-white shadow">
-                    {{ $loop->iteration }}
-                </div>
-                @endif
-            </div>
-
-            <div class="p-4">
-                <h4 class="font-bold text-[#1E1E1E] mb-1 line-clamp-2">{{ $livre->titre }}</h4>
-                <p class="text-[#FFC62A] font-bold text-lg">{{ number_format($livre->prix, 3) }} dt</p>
-                <p class="text-gray-600 text-sm">{{ $livre->auteur }}</p>
-
-                @if($livre->total_vendu > 0)
-                <div class="mt-3 inline-flex items-center gap-1 bg-[#01B3BB]/10 text-[#01B3BB] text-xs px-3 py-1 rounded-full">
-                    <span class="font-semibold">{{ $livre->total_vendu }}</span>
-                    <span>vendus</span>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endforeach
-    </div>
-
-</div>
-@endif
 <!-- Titre simple avant tous les livres -->
 <div class="mb-4" id="tous-les-livres">
     <h2 class="text-2xl font-bold text-[#1E1E1E] inline-block">
-        Tous nos livres
+        <i class="fa-solid fa-book-open" style="color: rgb(255, 212, 59);"></i> Tous nos livres
     </h2>
     <span class="ml-3 bg-[#01B3BB] text-white text-sm px-3 py-1 rounded-full">
         {{ $livres->total() ?? count($livres) }} livres
@@ -1172,6 +1113,66 @@ function slideCategories(direction) {
         visibility: visible;
     }
 </style>
+<!-- ====================== LES PLUS DEMANDÉS ====================== -->
+@if($bestSellers->isNotEmpty())
+<div class="mb-16" id="plus-demandes">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="bg-gradient-to-r from-[#FFC62A] to-[#FFD666] p-3 rounded-full shadow-md">
+            <svg class="w-7 h-7 text-[#1E1E1E]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l-5.5 9h11L12 2zM4 13h16v2H4v-2zm0 4h16v2H4v-2z"/>
+            </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-[#1E1E1E]">Les plus demandés</h2>
+        <span class="bg-[#01B3BB] text-white px-4 py-1.5 rounded-full text-sm font-semibold">
+            Top {{ $bestSellers->count() }}
+        </span>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+        @foreach($bestSellers as $livre)
+        <div class="book-card bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all group relative">
+            
+            <a href="{{ route('book.show', $livre->id_livre) }}" class="absolute inset-0 z-10"></a>
+            
+            <div class="relative">
+                @if($livre->image && file_exists(storage_path('app/public/' . $livre->image)))
+                    <img src="{{ asset('storage/' . $livre->image) }}" 
+                         alt="{{ $livre->titre }}" 
+                         class="w-full h-52 object-cover">
+                @else
+                    <div class="w-full h-52 bg-gradient-to-r from-[#01B3BB] to-[#4ECFD7] flex items-center justify-center">
+                        <svg class="w-16 h-16 text-white/70" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                        </svg>
+                    </div>
+                @endif
+
+                <!-- Badge rang (top 3) -->
+                @if($loop->iteration <= 3)
+                <div class="absolute top-3 right-3 bg-[#FFC62A] text-[#1E1E1E] text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full border-2 border-white shadow">
+                    {{ $loop->iteration }}
+                </div>
+                @endif
+            </div>
+
+            <div class="p-4">
+                <h4 class="font-bold text-[#1E1E1E] mb-1 line-clamp-2">{{ $livre->titre }}</h4>
+                <p class="text-[#FFC62A] font-bold text-lg">{{ number_format($livre->prix, 3) }} dt</p>
+                <p class="text-gray-600 text-sm">{{ $livre->auteur }}</p>
+
+                @if($livre->total_vendu > 0)
+                <div class="mt-3 inline-flex items-center gap-1 bg-[#01B3BB]/10 text-[#01B3BB] text-xs px-3 py-1 rounded-full">
+                    <span class="font-semibold">{{ $livre->total_vendu }}</span>
+                    <span>vendus</span>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+</div>
+@endif
 @endsection
 
 @section('scripts')
