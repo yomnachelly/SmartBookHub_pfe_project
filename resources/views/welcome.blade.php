@@ -374,7 +374,12 @@ function applyTopCategory(value) {
                                     <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800">
                                         En stock
                                     </span>
-                                @endif
+                                    @else
+        <span class="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-800">
+            Rupture de stock
+        </span>
+    @endif
+                               
                             </div>
                         </div>
                     </div>
