@@ -340,7 +340,7 @@ function applyTopCategory(value) {
                 @foreach($nouveauxLivres as $livre)
                 <div class="min-w-[180px] md:min-w-[200px] flex-shrink-0">
                     <div class="book-card-small bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition relative">
-                        @if(\Carbon\Carbon::parse($livre->created_at)->diffInDays(now()) <= 7)
+                        @if(\Carbon\Carbon::parse($livre->created_at)->diffInDays(now()) <= 30)
                         <div class="absolute top-1 right-1 z-20 w-10 h-10 pointer-events-none">
                             <dotlottie-wc
                                 src="https://lottie.host/3905217e-800c-43ed-8deb-57fd9de150e1/exJ2kIkPnp.lottie"
