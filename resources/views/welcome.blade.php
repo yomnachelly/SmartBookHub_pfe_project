@@ -1132,7 +1132,46 @@ function slideCategories(direction) {
         slides.style.transform = `translateX(-${index * 100}%)`;
     }, 2600);
 </script>
+{{-- Flèche pour remonter en haut --}}
+<a href="#" id="back-to-top" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-[#01B3BB] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
+    <i class="fa-solid fa-circle-up fa-beat-fade text-3xl"></i>
+</a>
+<script>
+    // Gestion du clic sur la flèche
+    document.getElementById('back-to-top').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
 
+    // Optionnel : Masquer la flèche quand on est en haut
+    window.addEventListener('scroll', function() {
+        const arrow = document.getElementById('back-to-top');
+        if (window.scrollY > 300) {
+            arrow.classList.remove('opacity-0', 'invisible');
+            arrow.classList.add('opacity-100', 'visible');
+        } else {
+            arrow.classList.remove('opacity-100', 'visible');
+            arrow.classList.add('opacity-0', 'invisible');
+        }
+    });
+</script>
+
+<style>
+    #back-to-top {
+        transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+    }
+    #back-to-top.opacity-0 {
+        opacity: 0;
+        visibility: hidden;
+    }
+    #back-to-top.opacity-100 {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
 @endsection
 
 @section('scripts')
