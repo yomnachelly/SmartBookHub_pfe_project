@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Smart Book Hub</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -19,7 +20,7 @@
 
 @include('layouts.footer')
 
-{{-- ==================== AVATAR FLOTTANT ==================== --}}
+{{-- AVATAR FLOTTANT --}}
 <div id="chatbot-avatar" style="
     position: fixed;
     bottom: 5px;
@@ -41,7 +42,7 @@
     </a>
 </div>
 
-{{-- ==================== CHAT PANEL ==================== --}}
+{{-- CHAT PANEL --}}
 <div id="chatbot-panel" style="
     position: fixed;
     top: 0;
@@ -182,7 +183,7 @@
 {{-- ==================== SCRIPT ==================== --}}
 <script>
 let chatPanelOpen = false;
-let panelWidth = Math.max(window.innerWidth * 0.3, 280); // 30% de l'écran ou minimum 280px
+let panelWidth = Math.max(window.innerWidth * 0.3, 280);
 let isResizing = false;
 let startX = 0;
 let startWidth = 0;
@@ -269,36 +270,73 @@ function addMessage(text, isUser) {
     messages.scrollTop = messages.scrollHeight;
 }
 
-// ⚡ Ici tu peux connecter à FastAPI
+function addTypingIndicator() {
+    const wrapper = document.createElement('div');
+    wrapper.id = 'typing-indicator';
+    wrapper.style.cssText = 'display:flex;gap:10px;align-items:flex-start;';
+    wrapper.innerHTML = `
+        <div style="background:white;border-radius:0 16px 16px 16px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.08);font-size:14px;color:#9ca3af;font-family:sans-serif;">
+            En train d'écrire...
+        </div>`;
+    messages.appendChild(wrapper);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const el = document.getElementById('typing-indicator');
+    if (el) el.remove();
+}
+
 async function sendChatMessage() {
     const input = document.getElementById('chatbot-input');
+    const sendBtn = document.getElementById('send-btn');
     const text = input.value.trim();
-    if(!text) return;
+    if (!text) return;
 
     addMessage(text, true);
     input.value = '';
     input.style.height = 'auto';
+    sendBtn.disabled = true;
+    addTypingIndicator();
 
     try {
-        // Changement important : utilise l'URL complète de ton Laravel
-        const response = await fetch('/api/chatbot/ask', {
+        const response = await fetch('/chatbot/ask', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({ prompt: text })
         });
-        
+
+        removeTypingIndicator();
+
+        if (response.status === 401) {
+            addMessage('Session expirée, veuillez vous reconnecter.', false);
+            return;
+        }
+
         const data = await response.json();
-       addMessage(data.answer ?? 'Pas de réponse', false);
-    } catch(err) {
-        console.error('Erreur:', err);
-        addMessage('Erreur de connexion au backend', false);
+        addMessage(data.answer ?? 'Pas de réponse', false);
+
+    } catch (err) {
+        removeTypingIndicator();
+        console.error('Chatbot error:', err);
+        addMessage('Erreur de connexion au backend.', false);
+    } finally {
+        sendBtn.disabled = false;
     }
 }
 </script>
 
+<style>
+    #chatbot-messages::-webkit-scrollbar { width: 5px; }
+    #chatbot-messages::-webkit-scrollbar-track { background: transparent; }
+    #chatbot-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    #chatbot-panel-content { will-change: transform; }
+    #chatbot-input::placeholder { color: #94a3b8; }
+    #send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
 
 </body>
 </html>
