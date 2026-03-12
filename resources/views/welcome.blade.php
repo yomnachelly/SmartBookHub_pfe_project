@@ -3,7 +3,7 @@
 @section('content')
 <div class="h-8"></div>
 <section class="relative overflow-hidden bg-[#01B3BB]">
-    
+
 </section>
     <section class="relative overflow-hidden bg-[#01B3BB]">
         <div class="absolute inset-0 bg-gradient-to-br from-[#01B3BB] via-[#2ac8d0] to-[#4ECFD7]">
@@ -579,41 +579,12 @@ function slideNewBooks(direction) {
 
             <!-- sidebar filter -->
             <aside class="w-64">
-                <div class="bg-[#01B3BB] text-white rounded-t-3xl p-6">
-                    <h3 class="text-xl font-bold mb-6">Choisir une catégorie</h3>
-                    <!-- by category -->
-                    <form method="GET" action="{{ url('/') }}" id="categoryForm">
-                        @if(request()->filled('search'))
-                            <input type="hidden" name="search" value="{{ e(request('search')) }}">
-                        @endif
-                        @if(request()->filled('min_price'))
-                            <input type="hidden" name="min_price" value="{{ e(request('min_price')) }}">
-                        @endif
-                        @if(request()->filled('max_price'))
-                            <input type="hidden" name="max_price" value="{{ e(request('max_price')) }}">
-                        @endif
-                        
-                       <select id="categorieSelect"
-        name="categorie" 
-        onchange="this.form.submit()" 
-        class="w-full p-3 rounded-lg text-[#1E1E1E] bg-white border-2 border-gray-200 
-               focus:outline-none focus:border-[#FFC62A] animate-pulse">
-                            <option value="">Toutes les catégories</option>
-                            @if(isset($categories) && count($categories) > 0)
-                                @foreach($categories as $id => $name)
-                                    @if(!empty($name))
-                                        <option value="{{ e($id) }}" {{ request('categorie') == $id ? 'selected' : '' }}>
-                                            {{ e($name) }}
-                                        </option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </select>
-                    </form>
+            <div class="bg-[#01B3BB] text-white rounded-t-3xl p-6">
+                   
 
                   <!-- by price - version corrigée -->
 <!-- by price - version corrigée -->
-<h3 class="text-xl font-bold mt-8 mb-4 text-white">Choisir un prix (dt)</h3>
+<h3 class="text-xl font-bold mt-8 mb-4 text-white">Choisir un prix </h3>
 <div class="px-4 pb-6">
 
     <form method="GET" action="{{ url('/') }}" id="priceSliderForm">
