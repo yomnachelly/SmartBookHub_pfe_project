@@ -112,14 +112,22 @@ $annees = Livre::select(DB::raw('YEAR(annee_publication) as annee'), DB::raw('co
         ->orderBy('titre')
         ->take(3)
         ->get();
+
+    $randomAuthor = Livre::where('visible', true)
+        ->whereNotNull('auteur')
+        ->where('auteur', '!=', '')
+        ->inRandomOrder()
+        ->value('auteur');
+
     return view('welcome', compact(
         'livres',
         'categories',
         'plagesPrix',
         'editeurs',
-          'auteurs',
-          'annees',
-          'bestSellers'
+        'auteurs',
+        'annees',
+        'bestSellers',
+        'randomAuthor'
     ));
 }
     private function calculatePriceRanges()

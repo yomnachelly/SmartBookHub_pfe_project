@@ -1,260 +1,433 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="h-8"></div>
-<section class="relative overflow-hidden bg-[#01B3BB]">
+{{-- ====================== HERO CAROUSEL ====================== --}}
+<style>
+#heroSection {
+    background: #01B3BB;
+    padding: 2.5rem 0 0;
+    position: relative;
+    overflow: hidden;
+}
 
+/* wave bottom edge */
+#heroSection .hero-wave {
+    display: block;
+    width: 100%;
+    height: 40px;
+    margin-top: 1.5rem;
+}
+
+.hc-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+@media (max-width: 768px) {
+    .hc-container { flex-direction: column; gap: 1.5rem; }
+    .hc-right { display: none; }
+}
+
+/* ── slides ── */
+#hcSlides {
+    position: relative;
+    min-height: 180px;
+    flex: 1;
+}
+
+.hc-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
+}
+.hc-slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    position: relative;
+}
+.hc-slide.leaving {
+    opacity: 0 !important;
+    transform: translateY(-10px) !important;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.hc-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.22);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 3px 12px;
+    border-radius: 999px;
+    margin-bottom: 0.75rem;
+    width: fit-content;
+}
+
+.hc-tag-dot {
+    width: 5px; height: 5px;
+    background: #FFC62A;
+    border-radius: 50%;
+}
+
+.hc-title {
+    font-size: clamp(1.65rem, 3vw, 2.4rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 0.55rem;
+    letter-spacing: -0.01em;
+}
+
+.hc-title .hc-gold { color: #FFC62A; }
+
+.hc-desc {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    max-width: 380px;
+}
+
+.hc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #FFC62A;
+    color: #1E1E1E;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 9px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    width: fit-content;
+    box-shadow: 0 3px 12px rgba(255,198,42,0.4);
+}
+.hc-btn:hover {
+    background: #FFD666;
+    transform: translateY(-1px);
+    color: #1E1E1E;
+}
+.hc-btn svg { transition: transform 0.2s; }
+.hc-btn:hover svg { transform: translateX(3px); }
+
+/* ── visual ── */
+.hc-right {
+    flex-shrink: 0;
+    width: 180px;
+    position: relative;
+}
+
+#hcVisuals {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.hc-vis {
+    position: absolute;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+}
+.hc-vis.active { opacity: 1; pointer-events: auto; }
+
+.hc-img-wrap {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+
+.hc-img-wrap img {
+    width: 140px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.4);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+    display: block;
+}
+
+.hc-badge {
+    background: #fff;
+    color: #01B3BB;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 3px 12px;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.hc-lottie-bg {
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 16px;
+    padding: 10px;
+    backdrop-filter: blur(6px);
+}
+
+/* ── bottom nav ── */
+.hc-nav {
+    max-width: 960px;
+    margin: 1.2rem auto 0;
+    padding: 0 1.5rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hc-dot-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 6px 2px; outline: none;
+    display: flex; align-items: center;
+}
+
+.hc-dot {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.35);
+    transition: width 0.3s ease, background 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.hc-dot-btn.active .hc-dot {
+    width: 28px;
+    background: rgba(255,255,255,0.4);
+}
+
+.hc-dot-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0%; background: #FFC62A;
+    border-radius: 999px;
+}
+
+.hc-nav-counter {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.05em;
+    margin-left: 4px;
+}
+
+.hc-nav-counter b { color: #FFC62A; }
+
+.hc-arrows {
+    display: flex; gap: 5px;
+    margin-left: auto;
+}
+
+.hc-arr {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+.hc-arr:hover {
+    background: rgba(255,255,255,0.32);
+    transform: scale(1.08);
+}
+</style>
+<br>
+
+<section id="heroSection">
+    <div class="hc-container">
+
+        <!-- text slides -->
+        <div id="hcSlides">
+
+            <div class="hc-slide active" data-index="0">
+                <div class="hc-tag"><span class="hc-tag-dot"></span>مكتبة تعليمية متخصصة</div>
+                <h1 class="hc-title">إصدارات <span class="hc-gold">{{ $randomAuthor }}</span></h1>
+                <p class="hc-desc">منصة لبيع الكتب التعليمية بطريقة سهلة وسريعة</p>
+            </div>
+
+            <div class="hc-slide" data-index="1">
+                <div class="hc-tag"><span class="hc-tag-dot"></span>تسوق بسهولة</div>
+                <h1 class="hc-title">تجربة شراء <span class="hc-gold">سهلة</span></h1>
+                <p class="hc-desc">إضافة للسلة &nbsp;·&nbsp; قائمة المفضلة &nbsp;·&nbsp; بحث سريع</p>
+            </div>
+
+            <div class="hc-slide" data-index="2">
+                <div class="hc-tag"><span class="hc-tag-dot"></span>La plateforme</div>
+                <h1 class="hc-title">À <span class="hc-gold">propos</span></h1>
+                <p class="hc-desc">Découvrez la plateforme, son objectif et le parcours de l'auteur.</p>
+                <a href="{{ route('apropos') }}" class="hc-btn">
+                    Voir la page
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+
+            <div class="hc-slide" data-index="3">
+                <div class="hc-tag"><span class="hc-tag-dot"></span>IA intégrée</div>
+                <h1 class="hc-title">Assistant <span class="hc-gold">Intelligent</span></h1>
+                <p class="hc-desc">Pose tes questions et obtiens des réponses instantanées grâce à notre assistant intelligent.</p>
+            </div>
+
+            <div class="hc-slide" data-index="4">
+                <div class="hc-tag"><span class="hc-tag-dot"></span>Nous écrire</div>
+                <h1 class="hc-title"><span class="hc-gold">Contact</span></h1>
+                <p class="hc-desc">Une question ou une demande ? N'hésitez pas à nous contacter.</p>
+                <a href="{{ route('contact') }}" class="hc-btn">
+                    Envoyer un message
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- visual -->
+        <div class="hc-right">
+            <div id="hcVisuals">
+
+                <div class="hc-vis active" data-index="0">
+                    <div class="hc-img-wrap">
+                        <img src="/images/books-collection.png" alt="مجموعة الكتب">
+                        <span class="hc-badge">+50 إصدار</span>
+                    </div>
+                </div>
+
+                <div class="hc-vis" data-index="1">
+                    <div class="hc-lottie-bg">
+                        <dotlottie-wc src="https://lottie.host/a18e8bd3-5804-435d-a342-e51f247209c5/7tQ1cO0ocZ.lottie"
+                            style="width:130px;height:130px;" autoplay loop></dotlottie-wc>
+                    </div>
+                </div>
+
+                <div class="hc-vis" data-index="2">
+                    <div class="hc-lottie-bg">
+                        <dotlottie-wc src="https://lottie.host/67f181d6-1e6e-4cf9-a160-3987acaaa1bd/GPRikcyAkI.lottie"
+                            style="width:150px;height:150px;" autoplay loop></dotlottie-wc>
+                    </div>
+                </div>
+
+                <div class="hc-vis" data-index="3">
+                    <dotlottie-wc src="https://lottie.host/9e3bc69d-44b3-4dc6-9406-41618e7901ea/tH4fbbH7L9.lottie"
+                        style="width:160px;height:160px;" autoplay loop></dotlottie-wc>
+                </div>
+
+                <div class="hc-vis" data-index="4">
+                    <div class="hc-lottie-bg">
+                        <dotlottie-wc src="https://lottie.host/dd656bd3-c27a-4820-b408-6d5bd033427b/k2ATZasDuC.lottie"
+                            style="width:150px;height:150px;" autoplay loop></dotlottie-wc>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- nav -->
+    <div class="hc-nav">
+        <div style="display:flex;gap:6px;align-items:center;" id="hcDots">
+            <button class="hc-dot-btn active" data-index="0"><div class="hc-dot"><div class="hc-dot-fill" id="hcf-0"></div></div></button>
+            <button class="hc-dot-btn" data-index="1"><div class="hc-dot"><div class="hc-dot-fill" id="hcf-1"></div></div></button>
+            <button class="hc-dot-btn" data-index="2"><div class="hc-dot"><div class="hc-dot-fill" id="hcf-2"></div></div></button>
+            <button class="hc-dot-btn" data-index="3"><div class="hc-dot"><div class="hc-dot-fill" id="hcf-3"></div></div></button>
+            <button class="hc-dot-btn" data-index="4"><div class="hc-dot"><div class="hc-dot-fill" id="hcf-4"></div></div></button>
+        </div>
+        <span class="hc-nav-counter"><b id="hcCur">01</b> / 05</span>
+        <div class="hc-arrows">
+            <button class="hc-arr" id="hcPrev">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M7.5 1.5L3 5.5l4.5 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="hc-arr" id="hcNext">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M3.5 1.5L8 5.5 3.5 9.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- transition -> next section -->
+    <svg class="hero-wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 40" preserveAspectRatio="none">
+        <path fill="#ffffff" d="M0,20 C360,40 1080,0 1440,20 L1440,40 L0,40 Z"/>
+    </svg>
 </section>
-    <section class="relative overflow-hidden bg-[#01B3BB]">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#01B3BB] via-[#2ac8d0] to-[#4ECFD7]">
-            <div class="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_30%_40%,_white_0px,_transparent_1px)] bg-[length:40px_40px]"></div>
-            
-            <div class="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-r from-[#FFC62A]/10 to-[#FFD666]/5 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-gradient-to-l from-white/5 to-transparent rounded-full blur-3xl"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-[#01B3BB]/20 to-transparent rounded-full blur-3xl"></div>
-        </div>
-        
-        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
-        
-        <div class="container relative mx-auto px-4 py-20 md:py-24">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-12">
-                <div class="w-full lg:w-2/5 order-2 lg:order-1">
-                    <div class="relative flex justify-center lg:justify-start">
-                        <div class="relative group cursor-pointer w-4/5 lg:w-3/4">
-                            <div class="relative rounded-2xl overflow-hidden border border-white/30 bg-white/10 backdrop-blur-xl shadow-2xl">
-                                <div class="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent"></div>
-                                
-                                <img src="/images/books-collection.png" alt="مجموعة الكتب" 
-                                    class="w-full transform transition-all duration-700 group-hover:scale-110">
-                                
-                                <div class="absolute inset-0 bg-gradient-to-t from-[#01B3BB]/30 via-transparent to-transparent 
-                                            opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            </div>
-                            
-                            <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 
-                                        bg-white/95 backdrop-blur-xl text-[#01B3BB] text-sm font-semibold 
-                                        px-5 py-2.5 rounded-full border border-white/40 shadow-lg
-                                        transition-all duration-300 group-hover:scale-105">
-                                +50 إصدار
-                            </div>
-                        </div>
-                    </div>
-                </div>
-<div class="w-full lg:w-3/5 text-center order-1 lg:order-2 px-4 lg:px-0">
-    <div id="heroCarousel" class="relative overflow-hidden">
-        
-        <!-- Slides wrapper -->
-        <div class="flex transition-transform duration-700 ease-in-out" id="heroSlides">
 
-            <!-- Slide 1 -->
-            <div class="min-w-full">
-                <div class="inline-flex items-center gap-3 mb-8 px-4 py-2.5 
-                        bg-white/15 backdrop-blur-sm rounded-full border border-white/25">
-                    <div class="w-2 h-2 rounded-full bg-[#FFC62A] animate-pulse"></div>
-                    <span class="text-white/95 text-sm font-medium tracking-wider">
-                        مكتبة تعليمية متخصصة
-                    </span>
-                </div>
+<script>
+(function(){
+    const D=3600, N=5;
+    const slides  = document.querySelectorAll('.hc-slide');
+    const visuals = document.querySelectorAll('.hc-vis');
+    const dots    = document.querySelectorAll('.hc-dot-btn');
+    const fills   = document.querySelectorAll('.hc-dot-fill');
+    const cur_el  = document.getElementById('hcCur');
+    const sec     = document.getElementById('heroSection');
+    let c=0, tmr=null, raf=null, t0=null, paused=false;
 
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-                    <span class="block mb-2">إصدارات</span>
-                    <span class="font-bold bg-gradient-to-r from-white via-white/95 to-white/90 
-                                bg-clip-text text-transparent drop-shadow-lg">
-                         طارق البريكي
-                    </span>
-                </h1>
+    function go(n){
+        const p=c; c=(n+N)%N;
+        slides[p].classList.add('leaving');
+        slides[p].classList.remove('active');
+        visuals[p].classList.remove('active');
+        dots[p].classList.remove('active');
+        fills[p].style.width='0%';
+        setTimeout(()=>slides[p].classList.remove('leaving'),480);
+        slides[c].classList.add('active');
+        visuals[c].classList.add('active');
+        dots[c].classList.add('active');
+        cur_el.textContent=String(c+1).padStart(2,'0');
+        cancelAnimationFrame(raf);
+        fills[c].style.width='0%';
+        fills[c].offsetWidth;
+        t0=performance.now();
+        (function tick(now){
+            if(paused){raf=requestAnimationFrame(tick);return;}
+            fills[c].style.width=Math.min(((now-t0)/D)*100,100)+'%';
+            if((now-t0)<D) raf=requestAnimationFrame(tick);
+        })(t0);
+    }
 
-                <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
-                    منصة لبيع الكتب التعليمية بطريقة سهلة وسريعة
-                </p>
-            </div>
-  <!-- Slide 4 -->
-<div class="min-w-full text-center">
+    function startTimer(){clearInterval(tmr);tmr=setInterval(()=>{if(!paused)go(c+1);},D);}
 
-    <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-        تجربة شراء سهلة
-    </h1>
+    document.getElementById('hcPrev').addEventListener('click',()=>{go(c-1);startTimer();});
+    document.getElementById('hcNext').addEventListener('click',()=>{go(c+1);startTimer();});
+    dots.forEach(b=>b.addEventListener('click',()=>{go(+b.dataset.index);startTimer();}));
 
-    <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed max-w-2xl mx-auto">
-        إضافة للسلة • قائمة المفضلة • بحث سريع
-    </p>
+    sec.addEventListener('mouseenter',()=>{paused=true;});
+    sec.addEventListener('mouseleave',()=>{
+        paused=false;
+        t0=performance.now()-(parseFloat(fills[c].style.width)/100*D);
+    });
 
-    <!-- ANIMATION LOTTIE -->
-    <div class="flex justify-center mb-10">
-        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-xl">
-            <dotlottie-wc
-                src="https://lottie.host/a18e8bd3-5804-435d-a342-e51f247209c5/7tQ1cO0ocZ.lottie"
-                class="w-[100px] h-[100px] md:w-[100px] md:h-[100px]"
-                autoplay
-                loop>
-            </dotlottie-wc>
-        </div>
-    </div>
+    let tx=0;
+    sec.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+    sec.addEventListener('touchend',e=>{
+        const d=tx-e.changedTouches[0].clientX;
+        if(Math.abs(d)>45){go(d>0?c+1:c-1);startTimer();}
+    },{passive:true});
 
-</div>
-          <!-- Slide 2 -->
-<div class="min-w-full flex flex-col md:flex-row items-center justify-between gap-10">
+    go(0);startTimer();
+})();
+</script>
+{{-- ====================== END HERO CAROUSEL ====================== --}}
 
-    <!-- TEXTE -->
-    <div class="text-center md:text-left max-w-2xl">
-        <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-            À propos
-        </h1>
-
-        <p class="text-lg md:text-xl text-white/85 mb-10 font-light tracking-wide leading-relaxed">
-            Découvrez la plateforme, son objectif et le parcours de l’auteur.
-        </p>
-
-        <a href="{{ route('apropos') }}" 
-           class="inline-flex items-center gap-2 px-6 py-3 bg-white/15 backdrop-blur-sm 
-                  border border-white/25 rounded-full text-white font-medium 
-                  hover:bg-white/25 hover:scale-105 transition group">
-            
-            <svg class="w-5 h-5 animate-pulse group-hover:animate-bounce transition" 
-                 fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" 
-                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" 
-                      clip-rule="evenodd"/>
-            </svg>
-
-            <span>Voir la page</span>
-        </a>
-    </div>
-
-    <!-- ANIMATION LOTTIE -->
-    <div class="flex justify-center md:justify-end">
-        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-xl">
-            <dotlottie-wc
-                src="https://lottie.host/67f181d6-1e6e-4cf9-a160-3987acaaa1bd/GPRikcyAkI.lottie"
-                class="w-[260px] h-[260px] md:w-[320px] md:h-[320px]"
-                autoplay
-                loop>
-            </dotlottie-wc>
-        </div>
-    </div>
-
-</div>
-<!-- Slide 5 -->
-<div class="min-w-full flex flex-col lg:flex-row items-center justify-center gap-10 px-4 lg:px-20">
-
-    <!-- Texte à gauche -->
-    <div class="text-center lg:text-left max-w-lg">
-        <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-            Assistant Intelligent
-        </h1>
-
-        <p class="text-xl md:text-2xl text-white/85 mb-10 font-light tracking-wide leading-relaxed">
-            Pose tes questions et obtiens des réponses instantanées grâce à notre assistant intelligent.
-        </p>
-    </div>
-
-    <!-- Animation à droite -->
-    <div class="flex justify-center lg:justify-end">
-        <dotlottie-wc
-            src="https://lottie.host/9e3bc69d-44b3-4dc6-9406-41618e7901ea/tH4fbbH7L9.lottie"
-            class="w-[300px] h-[300px] md:w-[400px] md:h-[400px]"
-            autoplay
-            loop>
-        </dotlottie-wc>
-    </div>
-
-</div>
-           <!-- Slide 3 -->
-<div class="min-w-full flex flex-col md:flex-row items-center justify-between gap-10">
-
-    <!-- TEXTE -->
-    <div class="text-center md:text-left max-w-2xl">
-        <h1 class="text-5xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-6 leading-[1.05]">
-            Contact
-        </h1>
-
-        <p class="text-lg md:text-xl text-white/85 mb-10 font-light tracking-wide leading-relaxed">
-            Une question ou une demande ? N’hésitez pas à nous contacter.
-        </p>
-
-        <a href="{{ route('contact') }}" 
-           class="inline-flex items-center gap-2 px-6 py-3 bg-white/15 backdrop-blur-sm 
-                  border border-white/25 rounded-full text-white font-medium 
-                  hover:bg-white/25 hover:scale-105 transition group">
-            
-            <svg class="w-5 h-5 animate-pulse group-hover:animate-bounce transition" 
-                 fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-            </svg>
-
-            <span>Envoyer un message</span>
-        </a>
-    </div>
-
-    <!-- ANIMATION LOTTIE -->
-    <div class="flex justify-center md:justify-end">
-        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-xl">
-            <dotlottie-wc
-                src="https://lottie.host/dd656bd3-c27a-4820-b408-6d5bd033427b/k2ATZasDuC.lottie"
-                class="w-[260px] h-[260px] md:w-[320px] md:h-[320px]"
-                autoplay
-                loop>
-            </dotlottie-wc>
-        </div>
-    </div>
-
-</div>
-
-          
-
-        </div>
-    </div>
-</div>
-                <!-- Author image -->
-                <div class="w-full lg:w-2/5 order-3">
-                    <div class="relative flex justify-center lg:justify-end">
-                        <div class="relative group w-4/5 lg:w-3/4">
-                            <div class="relative rounded-2xl overflow-hidden border border-white/30 
-                                        bg-white/10 backdrop-blur-xl shadow-2xl">
-                                <div class="absolute inset-0 bg-gradient-to-tr from-white/15 to-transparent"></div>
-                                
-                                <img src="/images/author.png" alt="طارق البريكي" 
-                                    class="w-full transform transition-all duration-700 group-hover:scale-110">
-                                
-                                <div class="absolute inset-0 bg-gradient-to-t from-[#01B3BB]/30 via-transparent to-transparent 
-                                            opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            </div>
-                            
-                            <div class="absolute -bottom-4 right-6 
-                                        bg-white/95 backdrop-blur-xl text-[#01B3BB] text-sm font-semibold 
-                                        px-4 py-2 rounded-full border border-white/40 shadow-lg
-                                        transition-all duration-300 group-hover:scale-105">
-                                <span class="flex items-center gap-2">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"/>
-                                    </svg>
-                                    المؤلف
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="absolute bottom-0 left-0 right-0 h-48 
-                    bg-gradient-to-t from-white/10 via-white/5 to-transparent pointer-events-none"></div>
-        
-        <div class="absolute top-1/4 left-10">
-            <div class="w-1 h-1 rounded-full bg-white/30 animate-pulse"></div>
-            <div class="w-2 h-2 rounded-full bg-white/20 ml-4 mt-2 animate-pulse" style="animation-delay: 0.3s"></div>
-        </div>
-        <div class="absolute bottom-1/3 right-12">
-            <div class="w-2 h-2 rounded-full bg-white/25 animate-pulse" style="animation-delay: 0.7s"></div>
-            <div class="w-1 h-1 rounded-full bg-white/15 -ml-3 mt-3 animate-pulse" style="animation-delay: 1s"></div>
-        </div>
-    </section>
 {{-- ====================== BANDE ORANGE STICKY ====================== --}}
 <nav class="sticky top-0 z-[60] bg-[#FFC62A] shadow-lg py-4">
     <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
-        <!-- Dropdown catégories (tu gardes tel quel, il marche déjà) -->
+        <!-- Dropdown catégories -->
         <div class="relative w-72">
             <select id="topCategorySelect" onchange="applyTopCategory(this.value)"
                 class="w-full bg-white text-[#1E1E1E] font-semibold text-base px-6 py-3.5 rounded-3xl border-0 focus:outline-none focus:ring-4 focus:ring-white/50 appearance-none cursor-pointer">
@@ -276,7 +449,6 @@
             </div>
         </div>
 
-        <!-- Liens qui scrollent maintenant (smooth) -->
         <div class="flex items-center gap-x-9 text-white font-semibold text-[15px] tracking-wide">
             <a href="#plus-demandes" class="hover:text-[#FFC62A] transition-colors">Meilleures Ventes</a>
             <a href="#tous-les-livres"  class="hover:text-[#1E1E1E] transition-colors" id="allBooksBtn">Tous les livres</a>
@@ -298,7 +470,6 @@ function applyTopCategory(value) {
     } else {
         url.searchParams.delete('categorie');
     }
-    // garder les autres filtres (search, prix, etc.)
     window.location.href = url.toString();
 }
 </script>
@@ -313,11 +484,9 @@ function applyTopCategory(value) {
                         Chercher
                     </button>
                 </form>
-<!-- Petit carrousel des nouveaux livres -->
 @php
     $nouveauxLivres = $livres->filter(function($livre) {
         return \Carbon\Carbon::parse($livre->created_at)->diffInDays(now()) <= 30;
-        // ou : ->lt(now()->subDays(30))  ← encore plus clair
     })->take(6);
 @endphp
 
@@ -334,7 +503,6 @@ function applyTopCategory(value) {
     </div>
     
     <div class="relative group/carousel">
-        <!-- Carousel container plus petit que la grille normale -->
         <div class="overflow-hidden rounded-xl">
             <div id="newBooksCarousel" class="flex transition-transform duration-500 ease-in-out gap-4">
                 @foreach($nouveauxLivres as $livre)
@@ -389,7 +557,7 @@ function applyTopCategory(value) {
             </div>
         </div>
         
-        <!-- Boutons de navigation (optionnels) -->
+        <!-- btns de navigation -->
         @if($nouveauxLivres->count() > 4)
         <button onclick="slideNewBooks('prev')" class="absolute -left-3 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-lg opacity-0 group-hover/carousel:opacity-100 transition-opacity z-30 hover:bg-gray-100">
             <svg class="w-5 h-5 text-[#1E1E1E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,7 +589,7 @@ let newBooksIndex = 0;
 const newBooksCarousel = document.getElementById('newBooksCarousel');
 if (newBooksCarousel) {
     const totalNewBooks = {{ $nouveauxLivres->count() }};
-    const visibleItems = window.innerWidth < 768 ? 2 : 4; // 2 items sur mobile, 4 sur desktop
+    const visibleItems = window.innerWidth < 768 ? 2 : 4; // 2 items -> mobile & 4 -> desktop
     
     // Auto-slide toutes les 4 secondes
     setInterval(() => {
@@ -450,7 +618,6 @@ function slideNewBooks(direction) {
 </script>
 @endif
 
-<!-- Titre simple avant tous les livres -->
 <div class="mb-4" id="tous-les-livres">
     <h2 class="text-2xl font-bold text-[#1E1E1E] inline-block">
         <i class="fa-solid fa-book-open" style="color: rgb(255, 212, 59);"></i> Tous nos livres
@@ -573,7 +740,7 @@ function slideNewBooks(direction) {
                     @endif
                 </div>
                 <div class="mt-10 flex justify-center">
-    {{ $livres->links('pagination::tailwind') }}   <!-- ou simple, bootstrap-4/5, etc. -->
+    {{ $livres->links('pagination::tailwind') }}
 </div>
             </main>
 
@@ -582,8 +749,6 @@ function slideNewBooks(direction) {
             <div class="bg-[#01B3BB] text-white rounded-t-3xl p-6">
                    
 
-                  <!-- by price - version corrigée -->
-<!-- by price - version corrigée -->
 <h3 class="text-xl font-bold mt-8 mb-4 text-white">Choisir un prix </h3>
 <div class="px-4 pb-6">
 
@@ -604,7 +769,6 @@ function slideNewBooks(direction) {
             $currentMin = (int)request('min_price', $minPossible);
             $currentMax = (int)request('max_price', $maxPossible);
             
-            // Ensure values are within bounds
             $currentMin = max($minPossible, min($currentMin, $maxPossible));
             $currentMax = max($minPossible, min($currentMax, $maxPossible));
         @endphp
@@ -621,7 +785,6 @@ function slideNewBooks(direction) {
         </div>
 
         <!-- Slider double -->
-        <!-- Slider double -->
 <div class="relative h-12 mb-6">
     <!-- Track de fond -->
     <div class="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/20 rounded-full"></div>
@@ -632,9 +795,9 @@ function slideNewBooks(direction) {
          style="left: {{ ($currentMin / $maxPossible) * 100 }}%; width: {{ (($currentMax - $currentMin) / $maxPossible) * 100 }}%;"></div>
 
     <!-- Conteneur des curseurs -->
-    <div class="absolute inset-0 px-3" id="priceSliderContainer">   <!-- ← AJOUTE CET ID -->
+    <div class="absolute inset-0 px-3" id="priceSliderContainer">
         
-        <!-- Curseur MAX (on le met en premier dans le DOM) -->
+        <!-- Curseur MAX -->
         <input type="range" id="maxRange" 
                min="{{ $minPossible }}" max="{{ $maxPossible }}" step="1"
                value="{{ $currentMax }}"
@@ -678,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const minPossible = parseInt(minRange.min);
     const maxPossible = parseInt(maxRange.max);
-    const gap = 5;   // ← petit espace minimum entre min et max (plus agréable)
+    const gap = 5;
 
     function updateSlider() {
         let minVal = parseInt(minRange.value);
@@ -702,7 +865,6 @@ document.addEventListener('DOMContentLoaded', function() {
         progress.style.width = (maxPercent - minPercent) + '%';
     }
 
-    // === VERSION FLUIDE : pointer-events + détection intelligente ===
     function activateSlider(activateMin) {
         if (activateMin) {
             minRange.style.zIndex = '50';
@@ -717,7 +879,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Au clic → on active le plus proche (avec petite tolérance)
+    // Au clic -> on active le plus proche (avec petite tolérance)
     container.addEventListener('mousedown', function(e) {
         const rect = container.getBoundingClientRect();
         const clickPercent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -745,7 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
         activateSlider(distanceToMin < distanceToMax);
     }, { passive: true });
 
-    // On relâche la souris/touch → on réactive les deux (pour le prochain clic)
+    // On relâche la souris/touch -> on réactive les deux (pour le prochain clic)
     document.addEventListener('mouseup', () => {
         minRange.style.pointerEvents = 'auto';
         maxRange.style.pointerEvents = 'auto';
@@ -760,7 +922,6 @@ document.addEventListener('DOMContentLoaded', function() {
     maxRange.addEventListener('input', updateSlider);
     updateSlider();
 
-    // Au premier chargement on active le min par défaut (plus naturel)
     activateSlider(true);
 });
 </script>
@@ -791,7 +952,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">{{ count(request('auteurs')) }}</span>
                 @endif
             </h4>
-            <div class="max-h-56 overflow-y-auto pr-3 space-y-1 text-sm">   {{-- space-y-1 au lieu de space-y-2 --}}
+            <div class="max-h-56 overflow-y-auto pr-3 space-y-1 text-sm">
                 @foreach($auteurs as $item)
                     @php $val = $item['auteur']; $cnt = $item['count']; @endphp
                     <label class="flex items-center gap-3 cursor-pointer hover:bg-white/10 py-1.5 px-3 rounded-xl transition group">  {{-- py-1.5 au lieu de p-2 --}}
@@ -894,7 +1055,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
         </div>
         <style>
-/* Smooth scroll + compensation de la barre sticky */
 html {
     scroll-behavior: smooth;
 }
@@ -902,18 +1062,17 @@ html {
 #plus-demandes, 
 #categories, 
 #tous-les-livres {
-    scroll-margin-top: 110px; /* hauteur de ta barre orange + marge */
+    scroll-margin-top: 110px;
 }
 </style>
 
 <script>
-// Optionnel : si tu veux encore plus de précision sur mobile
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
             e.preventDefault();
-            const navHeight = 85; // ajuste si besoin
+            const navHeight = 85;
             const elementPosition = target.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.scrollY - navHeight;
 
@@ -925,9 +1084,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 </script>
-        {{-- ====================== CAROUSEL CATÉGORIES (comme la photo) ====================== --}}
-{{-- ====================== CAROUSEL CATÉGORIES (version corrigée + petite) ====================== --}}
-{{-- ====================== CAROUSEL CATÉGORIES (images livres réelles + petite taille) ====================== --}}
+        {{-- CAROUSEL CATÉGORIES --}}
 <div class="mb-16" id="categories">
     <div class="flex items-center gap-3 mb-6">
         <div class="bg-[#FFC62A] p-2 rounded-full">
@@ -942,15 +1099,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         <div class="overflow-hidden rounded-2xl">
             <div id="categoriesCarousel" class="flex transition-transform duration-500 ease-in-out gap-4">
                 @php
-                    // Tableau d'images fixes par catégorie (ajoute/enlève selon tes vraies catégories)
                     $categoryImages = [
                         'livres-enfants' => 'https://thumbs.dreamstime.com/b/stack-children-s-story-books-colorful-covers-isolated-white-colorful-stack-children-s-story-books-displayed-368866956.jpg',
                         'mangas-bandes-dessinees' => 'https://c8.alamy.com/comp/BHJ3E3/manga-japanese-comic-books-in-a-pile-BHJ3E3.jpg',
                         'romans' => 'https://hips.hearstapps.com/hmg-prod/images/elle-book-romance-2025-lead-694c0b8d72dc7.jpg?crop=0.8888888888888888xw:1xh;center,top&resize=1200:*',
                         'developpement-personnel' => 'https://www.myselfhelphabit.co.uk/wp-content/uploads/2023/02/Personal-Development-Books-IMG_5196.jpg',
                         'paperbacks' => 'https://www.bookclique.org/wp-content/uploads/book-hoarding-1024x614.jpg',
-                        // Ajoute 'puzzle' si tu as la catégorie : 'puzzle' => 'URL_ICI',
-                        // Pour les autres, mets une image générique de pile de livres
                         'default' => 'https://thumbs.dreamstime.com/b/stack-colorful-children-s-storybooks-learning-creative-imagination-charming-vibrantly-colored-books-invites-young-368866972.jpg',
                     ];
                 @endphp
@@ -1011,7 +1165,7 @@ if (categoriesCarousel) {
     setInterval(() => {
         if (total > visibleItems) {
             categoriesIndex = (categoriesIndex + 1) % (total - visibleItems + 1);
-            const slideWidth = categoriesCarousel.children[0].offsetWidth + 16; // gap-4
+            const slideWidth = categoriesCarousel.children[0].offsetWidth + 16;
             categoriesCarousel.style.transform = `translateX(-${categoriesIndex * slideWidth}px)`;
         }
     }, 4500);
@@ -1031,19 +1185,8 @@ function slideCategories(direction) {
     carousel.style.transform = `translateX(-${categoriesIndex * slideWidth}px)`;
 }
 </script>
-        <!-- BANDEAU NEWSLETTER FNAC - PLUS BAS + PLUS ÉTROIT + SCRIPT FIXÉ -->
-    
    
-    <script>
-    const slides = document.getElementById('heroSlides');
-    const totalSlides = slides.children.length;
-    let index = 0;
-
-    setInterval(() => {
-        index = (index + 1) % totalSlides;
-        slides.style.transform = `translateX(-${index * 100}%)`;
-    }, 2600);
-</script>
+   
 {{-- Flèche pour remonter en haut --}}
 <a href="#" id="back-to-top" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-[#01B3BB] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
     <i class="fa-solid fa-circle-up fa-beat-fade text-3xl"></i>
@@ -1058,7 +1201,6 @@ function slideCategories(direction) {
         });
     });
 
-    // Optionnel : Masquer la flèche quand on est en haut
     window.addEventListener('scroll', function() {
         const arrow = document.getElementById('back-to-top');
         if (window.scrollY > 300) {
@@ -1149,14 +1291,13 @@ function slideCategories(direction) {
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ====================== SCROLL AUTO VERS "TOUS NOS LIVRES" ======================
-        const hasAnyFilter = window.location.search.length > 0;   // il y a au moins un ?paramètre
+        const hasAnyFilter = window.location.search.length > 0;
 
         if (hasAnyFilter) {
             const target = document.getElementById('tous-les-livres');
             if (target) {
                 setTimeout(() => {
-                    const navHeight = 110; // hauteur de la barre orange + marge
+                    const navHeight = 110;
                     const y = target.getBoundingClientRect().top + window.scrollY - navHeight;
                     window.scrollTo({
                         top: y,
@@ -1432,10 +1573,9 @@ input[type="number"] {
     position: absolute;
     width: calc(100% + 6px);
     left: -3px;
-    height: 48px; /* correspond à la hauteur de la zone du slider */
+    height: 48px;
 }
 
-/* Style des poignées (thumbs) */
 #minRange::-webkit-slider-thumb,
 #maxRange::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -1447,7 +1587,7 @@ input[type="number"] {
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    margin-top: -12px; /* pour centrer verticalement */
+    margin-top: -12px;
 }
 
 #minRange::-moz-range-thumb,
@@ -1461,7 +1601,6 @@ input[type="number"] {
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-/* Piste transparente */
 #minRange::-webkit-slider-runnable-track,
 #maxRange::-webkit-slider-runnable-track {
     width: 100%;
@@ -1476,7 +1615,6 @@ input[type="number"] {
     background: transparent;
 }
 
-/* Z-index corrigé : max au-dessus pour qu'on puisse le glisser */
 #minRange {
     z-index: 20;
 }

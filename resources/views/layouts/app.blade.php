@@ -249,6 +249,18 @@ function handleChatKeydown(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
 }
 
+function formatMessage(text) {
+    // Escape HTML to prevent XSS
+    const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    // Render **bold**, then newlines as <br>
+    return escaped
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+}
+
 function addMessage(text, isUser) {
     const wrapper = document.createElement('div');
     wrapper.style.cssText = `display:flex;gap:10px;align-items:flex-start;justify-content:${isUser?'flex-end':'flex-start'};`;
@@ -266,7 +278,7 @@ function addMessage(text, isUser) {
         font-family: sans-serif;
         word-wrap: break-word;
     `;
-    bubble.textContent = text;
+    bubble.innerHTML = formatMessage(text);
     wrapper.appendChild(bubble);
     messages.appendChild(wrapper);
     messages.scrollTop = messages.scrollHeight;
