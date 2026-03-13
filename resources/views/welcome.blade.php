@@ -1039,14 +1039,14 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="relative rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-black/20 backdrop-blur-sm">
         <div class="aspect-video">
             <iframe 
-                class="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/63YybNw9hzY?si=2EytMYc3_hAWDDIY"
-                title="Tutoriel utilisation plateforme"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerpolicy="strict-origin-when-cross-origin" 
-                allowfullscreen>
-            </iframe>
+    class="absolute inset-0 w-full h-full"
+    src="https://www.youtube.com/embed/y4hGPCbDe6s"
+    title="Tutoriel utilisation plateforme"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+    referrerpolicy="strict-origin-when-cross-origin" 
+    allowfullscreen>
+</iframe>
         </div>
     </div>
 </div>
